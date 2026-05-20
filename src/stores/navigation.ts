@@ -23,6 +23,7 @@ import {
   SearchCode,
   Activity,
   FileCode,
+  Siren,
 } from "lucide-vue-next";
 
 /**
@@ -62,6 +63,12 @@ export const useNavigationStore = defineStore("navigation", () => {
           title: "Dashboard",
           url: "/superadmin/dashboard",
           icon: LayoutDashboard,
+          isActive: false,
+        },
+        {
+          title: "Alerts",
+          url: "/admin/alerts",
+          icon: Siren,
           isActive: false,
         }
       ],
@@ -196,6 +203,12 @@ export const useNavigationStore = defineStore("navigation", () => {
           url: "/admin/home",
           icon: LayoutDashboard,
           isActive: true,
+        },
+        {
+          title: "Alerts",
+          url: "/admin/alerts",
+          icon: Siren,
+          isActive: false,
         },
         {
           title: "About",
