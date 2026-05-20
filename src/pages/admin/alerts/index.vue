@@ -3,7 +3,7 @@ import { onMounted, onBeforeUnmount, computed, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { toast } from "vue-sonner";
 import { useAlertsStore } from "@/stores/alerts";
-import { useSocket, disconnectSocket } from "@/composables/useSocket";
+import { useSocket } from "@/composables/useSocket";
 import { fireTestAlert } from "@/services/alerts.service";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,20 +21,31 @@ const alertsStore = useAlertsStore();
 const { alerts, total, loading, error, filters, pagination, unacknowledgedCount } =
   storeToRefs(alertsStore);
 
-// SocketIO listener is wired inside the composable; calling useSocket() is
-// enough to initialize the singleton connection.
+// SocketIO singleton; calling useSocket() initializes it if needed.
 const socket = useSocket();
 const socketConnected = ref(socket.connected);
-socket.on("connect", () => (socketConnected.value = true));
-socket.on("disconnect", () => (socketConnected.value = false));
+
+// Named handlers so we can unregister on unmount — registering anonymous
+// listeners on the singleton inside setup() leaks one handler per route
+// navigation, which compounds into UI lag after a few mounts.
+function onSocketConnect() {
+  socketConnected.value = true;
+}
+function onSocketDisconnect() {
+  socketConnected.value = false;
+}
 
 onMounted(() => {
+  socket.on("connect", onSocketConnect);
+  socket.on("disconnect", onSocketDisconnect);
   alertsStore.fetchAlerts();
 });
 
 onBeforeUnmount(() => {
-  // We don't disconnect the singleton here — other pages may still want
-  // realtime alerts. Disconnect on full app teardown / logout instead.
+  socket.off("connect", onSocketConnect);
+  socket.off("disconnect", onSocketDisconnect);
+  // Don't disconnect the singleton — other pages may want live alerts.
+  // Teardown happens on full app exit / logout.
 });
 
 // ---------- UI helpers ----------
