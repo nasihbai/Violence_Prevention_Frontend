@@ -33,6 +33,17 @@ export const adminRoutes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/admin/incidents/:id',
+    name: 'admin-incident-detail',
+    component: () => import('@/pages/admin/incidents/[id].vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'superadmin'],
+      layout: 'dashboard',
+      title: 'Incident'
+    }
+  },
+  {
     path: '/admin/dashboard',
     redirect: '/admin/home',
     meta: {

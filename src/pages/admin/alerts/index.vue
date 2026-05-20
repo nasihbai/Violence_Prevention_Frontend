@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, computed, ref } from "vue";
+import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { toast } from "vue-sonner";
 import { useAlertsStore } from "@/stores/alerts";
@@ -18,9 +19,14 @@ import {
 import { Inbox } from "lucide-vue-next";
 import type { Severity, IncidentStatus } from "@/types/alerts";
 
+const router = useRouter();
 const alertsStore = useAlertsStore();
 const { alerts, total, loading, error, filters, pagination, unacknowledgedCount } =
   storeToRefs(alertsStore);
+
+function openIncident(incidentId: number) {
+  router.push({ name: "admin-incident-detail", params: { id: incidentId } });
+}
 
 // SocketIO singleton; calling useSocket() initializes it if needed.
 const socket = useSocket();
@@ -319,8 +325,13 @@ async function onFireTest() {
           <div
             v-for="alert in alerts"
             :key="alert.id"
-            class="py-4 flex items-center justify-between gap-4"
+            class="py-4 flex items-center justify-between gap-4 cursor-pointer rounded-md transition-colors hover:bg-muted/50 px-2 -mx-2"
             :class="{ 'opacity-60': alert.dismissed }"
+            role="link"
+            tabindex="0"
+            :title="`Open incident #${alert.incident_id}`"
+            @click="openIncident(alert.incident_id)"
+            @keydown.enter="openIncident(alert.incident_id)"
           >
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2 flex-wrap">
@@ -346,7 +357,7 @@ async function onFireTest() {
                 v-if="!alert.acknowledged"
                 size="sm"
                 variant="default"
-                @click="onAcknowledge(alert.id)"
+                @click.stop="onAcknowledge(alert.id)"
               >
                 Acknowledge
               </Button>
@@ -354,7 +365,7 @@ async function onFireTest() {
                 v-if="!alert.dismissed"
                 size="sm"
                 variant="outline"
-                @click="onDismiss(alert.id)"
+                @click.stop="onDismiss(alert.id)"
               >
                 Dismiss
               </Button>
