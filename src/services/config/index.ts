@@ -28,7 +28,7 @@ export interface AppConfig {
 const defaultConfig: AppConfig = {
   environment: 'development',
   api: {
-    url: 'http://localhost:3000/api',
+    url: 'http://localhost:5000/api',
     timeout: 30000,
     retries: 3,
   },

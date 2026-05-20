@@ -25,7 +25,7 @@ const deduplication = useRequestDeduplication({
 const environments: Record<string, Environment> = {
   development: {
     name: "Development",
-    apiUrl: "http://localhost:3000/api",
+    apiUrl: "http://localhost:5000/api",
   },
   staging: {
     name: "Staging",
@@ -37,14 +37,16 @@ const environments: Record<string, Environment> = {
   },
 };
 
-// Get API URL based on environment
+// Get API URL based on environment.
+// Precedence: VITE_API_URL env > window.API_URL runtime override > environment map default.
 export const getApiUrl = (): string => {
-  // Use window.API_URL if available (for backward compatibility)
-  if (window.API_URL) {
+  const envUrl = import.meta.env.VITE_API_URL as string | undefined;
+  if (envUrl) return envUrl;
+
+  if (typeof window !== "undefined" && window.API_URL) {
     return window.API_URL;
   }
-  
-  // Otherwise use environment variable with fallback
+
   const env = process.env.NODE_ENV || "development";
   return environments[env]?.apiUrl || environments.development.apiUrl;
 };
