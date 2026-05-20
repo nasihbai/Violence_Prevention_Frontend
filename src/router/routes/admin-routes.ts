@@ -22,6 +22,17 @@ export const adminRoutes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/admin/alerts',
+    name: 'admin-alerts',
+    component: () => import('@/pages/admin/alerts/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'superadmin'],
+      layout: 'dashboard',
+      title: 'Alerts'
+    }
+  },
+  {
     path: '/admin/dashboard',
     redirect: '/admin/home',
     meta: {
