@@ -57,24 +57,29 @@ const severityColor: Record<Severity, string> = {
   critical: "bg-red-400 text-red-950 hover:bg-red-400",
 };
 
-const statusOptions: { label: string; value: IncidentStatus | "" }[] = [
-  { label: "All statuses", value: "" },
+// Radix/reka Select rejects empty-string values — they're reserved to mean
+// "no selection". Use a sentinel ("all") instead and translate to undefined
+// in the setX handlers below.
+const ALL = "all" as const;
+
+const statusOptions: { label: string; value: IncidentStatus | typeof ALL }[] = [
+  { label: "All statuses", value: ALL },
   { label: "Open", value: "open" },
   { label: "Investigating", value: "investigating" },
   { label: "Resolved", value: "resolved" },
   { label: "False positive", value: "false_positive" },
 ];
 
-const severityOptions: { label: string; value: Severity | "" }[] = [
-  { label: "All severities", value: "" },
+const severityOptions: { label: string; value: Severity | typeof ALL }[] = [
+  { label: "All severities", value: ALL },
   { label: "Low", value: "low" },
   { label: "Medium", value: "medium" },
   { label: "High", value: "high" },
   { label: "Critical", value: "critical" },
 ];
 
-const acknowledgedOptions: { label: string; value: "" | "true" | "false" }[] = [
-  { label: "All", value: "" },
+const acknowledgedOptions: { label: string; value: typeof ALL | "true" | "false" }[] = [
+  { label: "All", value: ALL },
   { label: "Unacknowledged", value: "false" },
   { label: "Acknowledged", value: "true" },
 ];
@@ -90,15 +95,17 @@ function formatTime(iso: string): string {
 // ---------- Filter handlers ----------
 
 function setStatus(v: string) {
-  alertsStore.setFilter("status", (v || undefined) as IncidentStatus | undefined);
+  const value = v === ALL ? undefined : (v as IncidentStatus);
+  alertsStore.setFilter("status", value);
   alertsStore.fetchAlerts();
 }
 function setSeverity(v: string) {
-  alertsStore.setFilter("severity", (v || undefined) as Severity | undefined);
+  const value = v === ALL ? undefined : (v as Severity);
+  alertsStore.setFilter("severity", value);
   alertsStore.fetchAlerts();
 }
 function setAcknowledged(v: string) {
-  const value = v === "" ? undefined : v === "true";
+  const value = v === ALL ? undefined : v === "true";
   alertsStore.setFilter("acknowledged", value);
   alertsStore.fetchAlerts();
 }
@@ -208,7 +215,7 @@ async function onFireTest() {
       <CardContent class="pt-6">
         <div class="flex flex-wrap gap-3">
           <div class="min-w-[180px]">
-            <Select :model-value="filters.status ?? ''" @update:model-value="setStatus">
+            <Select :model-value="filters.status ?? ALL" @update:model-value="setStatus">
               <SelectTrigger>
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
@@ -220,7 +227,7 @@ async function onFireTest() {
             </Select>
           </div>
           <div class="min-w-[180px]">
-            <Select :model-value="filters.severity ?? ''" @update:model-value="setSeverity">
+            <Select :model-value="filters.severity ?? ALL" @update:model-value="setSeverity">
               <SelectTrigger>
                 <SelectValue placeholder="Severity" />
               </SelectTrigger>
@@ -233,7 +240,7 @@ async function onFireTest() {
           </div>
           <div class="min-w-[180px]">
             <Select
-              :model-value="filters.acknowledged === undefined ? '' : String(filters.acknowledged)"
+              :model-value="filters.acknowledged === undefined ? ALL : String(filters.acknowledged)"
               @update:model-value="setAcknowledged"
             >
               <SelectTrigger>
@@ -314,6 +321,12 @@ async function onFireTest() {
               >
                 Dismiss
               </Button>
+              <span
+                v-if="alert.acknowledged && alert.dismissed"
+                class="text-xs text-muted-foreground italic"
+              >
+                no actions
+              </span>
             </div>
           </div>
         </div>
