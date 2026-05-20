@@ -28,7 +28,8 @@ export interface AppConfig {
 const defaultConfig: AppConfig = {
   environment: 'development',
   api: {
-    url: 'http://localhost:5000/api',
+    // Base URL only — endpoints carry their own prefix (/auth, /api).
+    url: 'http://localhost:5000',
     timeout: 30000,
     retries: 3,
   },

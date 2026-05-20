@@ -21,11 +21,13 @@ const deduplication = useRequestDeduplication({
   debug: process.env.NODE_ENV === 'development'
 });
 
-// Environment configuration
+// Environment configuration. apiUrl is the BASE URL (no path prefix);
+// each endpoint string passed to api() includes its own prefix
+// (/auth/* for auth, /api/* for data, etc.).
 const environments: Record<string, Environment> = {
   development: {
     name: "Development",
-    apiUrl: "http://localhost:5000/api",
+    apiUrl: "http://localhost:5000",
   },
   staging: {
     name: "Staging",

@@ -14,7 +14,7 @@ const getApiUrl = (): string => {
   const envUrl = import.meta.env.VITE_API_URL as string | undefined;
   if (envUrl) return envUrl;
   if (typeof window !== "undefined" && window.API_URL) return window.API_URL;
-  return "http://localhost:5000/api";
+  return "http://localhost:5000";
 };
 
 /**
