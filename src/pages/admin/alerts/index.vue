@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Inbox } from "lucide-vue-next";
 import type { Severity, IncidentStatus } from "@/types/alerts";
 
 const alertsStore = useAlertsStore();
@@ -269,15 +270,51 @@ async function onFireTest() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div v-if="loading" class="text-sm text-muted-foreground py-6 text-center">
-          Loading…
-        </div>
-        <div v-else-if="error" class="text-sm text-destructive py-6 text-center">
+        <!-- Error: only shown when there's no fallback data to display -->
+        <div
+          v-if="error && alerts.length === 0"
+          class="text-sm text-destructive py-6 text-center"
+        >
           {{ error }}
         </div>
-        <div v-else-if="alerts.length === 0" class="text-sm text-muted-foreground py-12 text-center">
-          No alerts match the current filters.
+
+        <!-- Initial load (loading + no data yet): skeleton rows -->
+        <div v-else-if="loading && alerts.length === 0" class="divide-y">
+          <div
+            v-for="n in 3"
+            :key="`skeleton-${n}`"
+            class="py-4 flex items-center justify-between gap-4 animate-pulse"
+          >
+            <div class="min-w-0 flex-1 space-y-2">
+              <div class="flex gap-2">
+                <div class="h-5 w-16 rounded bg-muted" />
+                <div class="h-5 w-20 rounded bg-muted" />
+                <div class="h-5 w-24 rounded bg-muted" />
+              </div>
+              <div class="h-4 w-1/3 rounded bg-muted" />
+            </div>
+            <div class="flex gap-2 shrink-0">
+              <div class="h-8 w-24 rounded bg-muted" />
+              <div class="h-8 w-20 rounded bg-muted" />
+            </div>
+          </div>
         </div>
+
+        <!-- Empty state -->
+        <div
+          v-else-if="alerts.length === 0"
+          class="py-12 text-center"
+        >
+          <div class="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+            <Inbox class="w-6 h-6 text-muted-foreground" />
+          </div>
+          <p class="text-sm font-medium">No alerts to show</p>
+          <p class="text-sm text-muted-foreground mt-1">
+            Either nothing matches the current filters, or no alerts have been recorded yet.
+          </p>
+        </div>
+
+        <!-- Actual list -->
         <div v-else class="divide-y">
           <div
             v-for="alert in alerts"

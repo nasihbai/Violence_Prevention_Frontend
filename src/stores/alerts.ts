@@ -54,8 +54,14 @@ export const useAlertsStore = defineStore("alerts", () => {
         ...extra,
       };
       const res = await svcList(query);
-      alerts.value = res.items;
-      total.value = res.total;
+      // Be defensive about the response envelope — if total is missing
+      // (older BE / partial response), fall back to items.length so the
+      // header card never renders empty.
+      alerts.value = Array.isArray(res?.items) ? res.items : [];
+      total.value =
+        typeof res?.total === "number"
+          ? res.total
+          : alerts.value.length;
     } catch (e: any) {
       console.error("Failed to fetch alerts:", e);
       error.value = e?.data?.errors?._?.[0] || e?.message || "Failed to load alerts";
