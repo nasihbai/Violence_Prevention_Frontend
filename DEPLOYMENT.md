@@ -48,15 +48,6 @@ NODE_ENV=production
 VITE_API_URL=https://your-api-domain.com
 VITE_API_TIMEOUT=30000
 
-# Database (if using)
-VITE_DB_CLIENT=mysql
-VITE_DB_HOST=your-db-host
-VITE_DB_PORT=3306
-VITE_DB_USER=your-db-user
-VITE_DB_PASSWORD=your-db-password
-VITE_DB_NAME=your-db-name
-VITE_DB_SSL=false
-
 # Feature Flags (optional)
 VITE_FEATURE_DARK_MODE=true
 VITE_FEATURE_MULTILINGUAL_SUPPORT=true

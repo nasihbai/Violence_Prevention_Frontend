@@ -8,14 +8,6 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
-      # Database Configuration
-      - VITE_DB_CLIENT=${VITE_DB_CLIENT:-mysql}
-      - VITE_DB_HOST=${DB_HOST:-db}
-      - VITE_DB_PORT=${DB_PORT:-3306}
-      - VITE_DB_USER=${DB_USER:-jboilerplate}
-      - VITE_DB_PASSWORD=${DB_PASSWORD:-jboilerplate}
-      - VITE_DB_NAME=${DB_NAME:-jboilerplate}
-      - VITE_DB_SSL=${VITE_DB_SSL:-false}
       # API Configuration
       - VITE_API_URL=${VITE_API_URL:-}
       - VITE_API_TIMEOUT=${VITE_API_TIMEOUT:-30000}
@@ -31,41 +23,13 @@ services:
       - "${WEB_PORT:-3100}:80"
     volumes:
       - app_logs:/app/logs
-    depends_on:
-      db:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    profiles:
-      - default
-      - with-db
-
-  db:
-    image: ${DB_IMAGE:-mysql:8}
-    restart: unless-stopped
-    environment:
-      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-rootpassword}
-      - MYSQL_DATABASE=${DB_NAME:-jboilerplate}
-      - MYSQL_USER=${DB_USER:-jboilerplate}
-      - MYSQL_PASSWORD=${DB_PASSWORD:-jboilerplate}
-    volumes:
-      - mysql_data:/var/lib/mysql
-    ports:
-      - "${DB_PORT_FORWARD:-3306}:3306"
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-rootpassword}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    profiles:
-      - with-db
 
 volumes:
-  mysql_data:
-    driver: local
   app_logs:
-    driver: local 
+    driver: local

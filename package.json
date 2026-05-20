@@ -41,8 +41,8 @@
     "prepare": "echo 'Skipping prepare script in production build'",
     "setup": "pnpm install && pnpm run build",
     "cli:setup": "cd cli && pnpm run build && pnpm run start setup",
-    "docker:full": "docker-compose --profile with-db up -d",
-    "docker:app-only": "docker-compose -f docker-compose.app-only.yml up -d"
+    "docker:app-only": "docker-compose -f docker-compose.app-only.yml up -d",
+    "docker:up": "docker-compose up -d"
   },
   "dependencies": {
     "@heroicons/vue": "^2.2.0",
