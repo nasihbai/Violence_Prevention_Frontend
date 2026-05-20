@@ -17,7 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Inbox } from "lucide-vue-next";
-import type { Severity, IncidentStatus } from "@/types/alerts";
+import CameraTile from "@/components/CameraTile.vue";
+import type { Alert, Severity, IncidentStatus } from "@/types/alerts";
 
 const router = useRouter();
 const alertsStore = useAlertsStore();
@@ -45,12 +46,14 @@ function onSocketDisconnect() {
 onMounted(() => {
   socket.on("connect", onSocketConnect);
   socket.on("disconnect", onSocketDisconnect);
+  socket.on("violence_alert", flashCameraForAlert);
   alertsStore.fetchAlerts();
 });
 
 onBeforeUnmount(() => {
   socket.off("connect", onSocketConnect);
   socket.off("disconnect", onSocketDisconnect);
+  socket.off("violence_alert", flashCameraForAlert);
   // Don't disconnect the singleton — other pages may want live alerts.
   // Teardown happens on full app exit / logout.
 });
@@ -156,6 +159,8 @@ async function onDismiss(id: number) {
 // ---------- Test fire (dev only) ----------
 
 const firing = ref(false);
+const seedingBatch = ref(false);
+
 async function onFireTest() {
   firing.value = true;
   try {
@@ -167,6 +172,56 @@ async function onFireTest() {
     firing.value = false;
   }
 }
+
+/** Spam-fire 5 alerts so an empty list becomes populated quickly. */
+async function onSeedFive() {
+  seedingBatch.value = true;
+  const severities: Severity[] = ["low", "medium", "high", "critical", "high"];
+  try {
+    for (const severity of severities) {
+      await fireTestAlert({ severity });
+    }
+    toast.success("5 demo alerts fired");
+    await alertsStore.fetchAlerts();
+  } catch (e: any) {
+    toast.error(e?.data?.errors?._?.[0] || "Seeding failed midway");
+  } finally {
+    seedingBatch.value = false;
+  }
+}
+
+// ---------- Camera tiles (mockup for now) ----------
+// Visual scaffold for Phase 4.5. When the multi-camera grid backend
+// lands, swap `online: false` for the real online state and `feedUrl`
+// for `${apiUrl}/video_feed/<stream_id>`. The `recentAlert` flag is
+// derived from the live alerts stream: any alert in the last 5s for
+// a given camera_id flashes its tile.
+interface MockCamera {
+  name: string;
+  streamId: string;
+  location: string;
+}
+const mockCameras: MockCamera[] = [
+  { name: "Main Entrance", streamId: "CAM_01", location: "Building A" },
+];
+
+const recentAlertCameras = ref<Set<string>>(new Set());
+
+function isCameraFlashing(streamId: string): boolean {
+  return recentAlertCameras.value.has(streamId);
+}
+
+function flashCameraForAlert(alert: Alert) {
+  if (!alert.camera_id) return;
+  recentAlertCameras.value.add(alert.camera_id);
+  // Auto-clear the flash after 5s so the tile returns to its calm state.
+  setTimeout(() => {
+    const next = new Set(recentAlertCameras.value);
+    next.delete(alert.camera_id!);
+    recentAlertCameras.value = next;
+  }, 5000);
+}
+
 </script>
 
 <template>
@@ -192,6 +247,29 @@ async function onFireTest() {
         </Button>
       </div>
     </div>
+
+    <!-- Camera tiles (visual scaffold; live feed wires in Phase 4.5) -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Live cameras</CardTitle>
+        <CardDescription>
+          Connected camera feeds. Real-time alerts flash the corresponding tile.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <CameraTile
+            v-for="cam in mockCameras"
+            :key="cam.streamId"
+            :name="cam.name"
+            :stream-id="cam.streamId"
+            :location="cam.location"
+            :online="false"
+            :recent-alert="isCameraFlashing(cam.streamId)"
+          />
+        </div>
+      </CardContent>
+    </Card>
 
     <!-- Summary cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -315,9 +393,26 @@ async function onFireTest() {
             <Inbox class="w-6 h-6 text-muted-foreground" />
           </div>
           <p class="text-sm font-medium">No alerts to show</p>
-          <p class="text-sm text-muted-foreground mt-1">
+          <p class="text-sm text-muted-foreground mt-1 mb-4">
             Either nothing matches the current filters, or no alerts have been recorded yet.
           </p>
+          <div class="flex items-center justify-center gap-2">
+            <Button
+              size="sm"
+              variant="default"
+              :disabled="seedingBatch"
+              @click="onSeedFive"
+            >
+              {{ seedingBatch ? "Seeding…" : "Fire 5 demo alerts" }}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              @click="alertsStore.clearFilters(); alertsStore.fetchAlerts()"
+            >
+              Clear filters
+            </Button>
+          </div>
         </div>
 
         <!-- Actual list -->
