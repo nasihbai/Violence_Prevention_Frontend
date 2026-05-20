@@ -58,7 +58,6 @@
     "class-variance-authority": "^0.6.0",
     "clsx": "^1.2.1",
     "date-fns": "^4.1.0",
-    "dotenv": "^16.5.0",
     "embla-carousel-autoplay": "^8.5.2",
     "embla-carousel-vue": "^8.5.2",
     "gapi-script": "^1.2.0",

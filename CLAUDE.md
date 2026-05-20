@@ -134,8 +134,7 @@ These checks take 2-3 minutes. Skipping them costs 30+ minutes in external revie
 - State: Pinia stores in `src/stores/`.
 - Routing: `vue-router` config in `src/router/`.
 - i18n: `vue-i18n`, locale files in `src/locales/`.
-- HTTP: `ofetch` + service modules in `src/services/`.
-- DB tooling: Knex migrations/seeds (`migrations/`, `seeds/`, `knexfile.js`) — this project also has a small backend surface; do NOT confuse it with the Python ML backend at `../FYP_Violence_Prevention_backend`.
+- HTTP: `ofetch` + service modules in `src/services/`. The `hono` import in `src/services/api-client.ts` is a client-side wrapper around ofetch — there is NO Node/Hono server in this repo.
 - Deployment: Docker + nginx (`Dockerfile`, `docker-compose.yml`, `nginx.conf`). See `DEPLOYMENT.md` before changing infra.
 
 ### Hard rules
@@ -156,10 +155,10 @@ These checks take 2-3 minutes. Skipping them costs 30+ minutes in external revie
 4. If you touched anything user-facing → check at least one non-English locale to confirm i18n keys resolve
 5. If you touched DB migrations → `pnpm migrate:latest` runs cleanly against a scratch DB
 
-### Don't confuse the two backends
-- This repo has a **small Node/Hono backend surface** for the web app (Knex migrations, `hono` package). That's app data — users, sessions, alert records.
-- The **Python ML inference backend** lives at `../FYP_Violence_Prevention_backend` and runs separately (TensorFlow/OpenCV/MediaPipe/LSTM). Frontend talks to it via HTTP only.
-- When the user says "backend", ask which one if it's ambiguous. Don't edit Python files from this repo.
+### There is only one backend
+- This is a pure Vue 3 SPA. There is NO Node.js / Hono server in this repo. The `hono` package is imported in `src/services/api-client.ts` only as a client-side wrapper.
+- The **Python ML inference backend** lives at `../FYP_Violence_Prevention_backend` (TensorFlow/OpenCV/MediaPipe/LSTM + Flask). The frontend talks to it over HTTP only.
+- Don't edit Python files from this repo.
 
 ## Compact Instructions
 
