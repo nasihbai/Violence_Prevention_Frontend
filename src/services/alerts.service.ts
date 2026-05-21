@@ -1,8 +1,11 @@
 /**
  * Alerts API client — wraps the BE's /api/alerts/* endpoints.
  * Components / stores should call these, not ofetch / api directly.
+ *
+ * Every call goes through unwrap() so a failed request (status >= 400)
+ * becomes a thrown error instead of a silently-empty success.
  */
-import { apiGet, apiPost } from "@/services/api";
+import { apiGet, apiPost, unwrap } from "@/services/api";
 import type { Alert, AlertsQuery, ListResponse } from "@/types/alerts";
 
 // Alerts are live data — never serve a stale cached list.
@@ -17,20 +20,17 @@ export async function listAlerts(query: AlertsQuery = {}): Promise<ListResponse<
   if (query.limit !== undefined) params.limit = query.limit;
   if (query.offset !== undefined) params.offset = query.offset;
 
-  const { data } = await apiGet<ListResponse<Alert>>("/api/alerts", params, NO_CACHE);
-  return data;
+  return unwrap(await apiGet<ListResponse<Alert>>("/api/alerts", params, NO_CACHE));
 }
 
 /** POST /api/alerts/<id>/acknowledge — marks alert acknowledged_by current user. */
 export async function acknowledgeAlert(id: number): Promise<Alert> {
-  const { data } = await apiPost<Alert>(`/api/alerts/${id}/acknowledge`, {});
-  return data;
+  return unwrap(await apiPost<Alert>(`/api/alerts/${id}/acknowledge`, {}));
 }
 
 /** POST /api/alerts/<id>/dismiss — marks alert dismissed. */
 export async function dismissAlert(id: number): Promise<Alert> {
-  const { data } = await apiPost<Alert>(`/api/alerts/${id}/dismiss`, {});
-  return data;
+  return unwrap(await apiPost<Alert>(`/api/alerts/${id}/dismiss`, {}));
 }
 
 /**
@@ -44,6 +44,5 @@ export async function fireTestAlert(opts: {
   severity?: "low" | "medium" | "high" | "critical";
   confidence?: number;
 } = {}): Promise<Alert> {
-  const { data } = await apiPost<Alert>("/api/test/fire-alert", opts);
-  return data;
+  return unwrap(await apiPost<Alert>("/api/test/fire-alert", opts));
 }

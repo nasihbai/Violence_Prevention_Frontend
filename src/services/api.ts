@@ -136,6 +136,34 @@ export function invalidateApiCache(pattern?: string): void {
   }
 }
 
+/**
+ * Unwrap an ApiResponse — return `.data` on success, THROW on error.
+ *
+ * The api() function and its apiGet/apiPost/... helpers return errors as
+ * VALUES (an ApiResponse with status >= 400), not exceptions. A caller
+ * that only destructures `.data` therefore can't tell a failure from a
+ * success — it just gets an empty object. Service modules pass every
+ * response through unwrap() so a failed request becomes a real throw
+ * that stores/components can catch.
+ *
+ * The thrown error carries `.status` and `.data.{errors,message}` so the
+ * existing `e?.data?.errors?._?.[0]` error-reading pattern keeps working.
+ */
+export function unwrap<T>(res: ApiResponse<T>): T {
+  if (res.status >= 400) {
+    const err = new Error(
+      res.message || `Request failed (${res.status})`,
+    ) as Error & {
+      status?: number;
+      data?: { errors?: Record<string, string[]>; message?: string };
+    };
+    err.status = res.status;
+    err.data = { errors: res.errors, message: res.message };
+    throw err;
+  }
+  return res.data;
+}
+
 // Main API function
 export async function api<T>(config: ApiConfig): Promise<ApiResponse<T>> {
   // Apply request interceptor

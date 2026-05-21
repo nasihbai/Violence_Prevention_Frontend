@@ -1,7 +1,10 @@
 /**
  * Incidents API client — wraps the BE's /api/incidents/* endpoints.
+ *
+ * Every call goes through unwrap() so a failed request (status >= 400)
+ * becomes a thrown error instead of a silently-empty success.
  */
-import { apiGet, apiPatch } from "@/services/api";
+import { apiGet, apiPatch, unwrap } from "@/services/api";
 import type {
   Incident,
   IncidentStatus,
@@ -21,14 +24,12 @@ export async function listIncidents(query: IncidentsQuery = {}): Promise<ListRes
   if (query.limit !== undefined) params.limit = query.limit;
   if (query.offset !== undefined) params.offset = query.offset;
 
-  const { data } = await apiGet<ListResponse<Incident>>("/api/incidents", params, NO_CACHE);
-  return data;
+  return unwrap(await apiGet<ListResponse<Incident>>("/api/incidents", params, NO_CACHE));
 }
 
 /** GET /api/incidents/<id> — returns the incident with its embedded alerts. */
 export async function getIncident(id: number): Promise<Incident> {
-  const { data } = await apiGet<Incident>(`/api/incidents/${id}`, undefined, NO_CACHE);
-  return data;
+  return unwrap(await apiGet<Incident>(`/api/incidents/${id}`, undefined, NO_CACHE));
 }
 
 /**
@@ -39,6 +40,5 @@ export async function updateIncident(
   id: number,
   patch: Partial<{ status: IncidentStatus; severity: Severity; notes: string }>,
 ): Promise<Incident> {
-  const { data } = await apiPatch<Incident>(`/api/incidents/${id}`, patch);
-  return data;
+  return unwrap(await apiPatch<Incident>(`/api/incidents/${id}`, patch));
 }
