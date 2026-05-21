@@ -25,6 +25,7 @@ import {
   FileCode,
   Siren,
   Video,
+  ClipboardList,
 } from "lucide-vue-next";
 
 /**
@@ -76,6 +77,12 @@ export const useNavigationStore = defineStore("navigation", () => {
           title: "Cameras",
           url: "/admin/streams",
           icon: Video,
+          isActive: false,
+        },
+        {
+          title: "Incidents",
+          url: "/admin/incidents",
+          icon: ClipboardList,
           isActive: false,
         }
       ],
@@ -221,6 +228,12 @@ export const useNavigationStore = defineStore("navigation", () => {
           title: "Cameras",
           url: "/admin/streams",
           icon: Video,
+          isActive: false,
+        },
+        {
+          title: "Incidents",
+          url: "/admin/incidents",
+          icon: ClipboardList,
           isActive: false,
         },
         {
