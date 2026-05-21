@@ -26,6 +26,7 @@ import {
   Siren,
   Video,
   ClipboardList,
+  MonitorPlay,
 } from "lucide-vue-next";
 
 /**
@@ -65,6 +66,12 @@ export const useNavigationStore = defineStore("navigation", () => {
           title: "Dashboard",
           url: "/superadmin/dashboard",
           icon: LayoutDashboard,
+          isActive: false,
+        },
+        {
+          title: "Live Monitoring",
+          url: "/admin/monitoring",
+          icon: MonitorPlay,
           isActive: false,
         },
         {
@@ -217,6 +224,12 @@ export const useNavigationStore = defineStore("navigation", () => {
           url: "/admin/home",
           icon: LayoutDashboard,
           isActive: true,
+        },
+        {
+          title: "Live Monitoring",
+          url: "/admin/monitoring",
+          icon: MonitorPlay,
+          isActive: false,
         },
         {
           title: "Alerts",

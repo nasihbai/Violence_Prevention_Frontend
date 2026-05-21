@@ -13,7 +13,9 @@
  */
 import { io, Socket } from "socket.io-client";
 import { useAlertsStore } from "@/stores/alerts";
+import { useStatsStore } from "@/stores/stats";
 import type { Alert } from "@/types/alerts";
+import type { DetectorStats } from "@/services/stats.service";
 
 let socket: Socket | null = null;
 
@@ -56,6 +58,15 @@ function initSocket(): Socket {
     } catch (e) {
       // Pinia not ready yet — non-fatal, alerts will refresh on next fetch.
       console.warn("[socket] alerts store unavailable:", e);
+    }
+  });
+
+  socket.on("stats_update", (payload: DetectorStats) => {
+    try {
+      const statsStore = useStatsStore();
+      statsStore.onStatsUpdate(payload);
+    } catch (e) {
+      console.warn("[socket] stats store unavailable:", e);
     }
   });
 

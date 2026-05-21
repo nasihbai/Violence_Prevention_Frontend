@@ -33,6 +33,17 @@ export const adminRoutes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/admin/monitoring',
+    name: 'admin-monitoring',
+    component: () => import('@/pages/admin/monitoring/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'superadmin'],
+      layout: 'dashboard',
+      title: 'Live Monitoring'
+    }
+  },
+  {
     path: '/admin/incidents',
     name: 'admin-incidents',
     component: () => import('@/pages/admin/incidents/index.vue'),
