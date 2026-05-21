@@ -44,6 +44,17 @@ export const adminRoutes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/admin/streams',
+    name: 'admin-streams',
+    component: () => import('@/pages/admin/streams/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'superadmin'],
+      layout: 'dashboard',
+      title: 'Cameras'
+    }
+  },
+  {
     path: '/admin/dashboard',
     redirect: '/admin/home',
     meta: {

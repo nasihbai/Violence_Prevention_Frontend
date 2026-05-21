@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { toast } from "vue-sonner";
 import { useAlertsStore } from "@/stores/alerts";
+import { useStreamsStore } from "@/stores/streams";
 import { useSocket } from "@/composables/useSocket";
 import { fireTestAlert } from "@/services/alerts.service";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -22,8 +23,10 @@ import type { Alert, Severity, IncidentStatus } from "@/types/alerts";
 
 const router = useRouter();
 const alertsStore = useAlertsStore();
+const streamsStore = useStreamsStore();
 const { alerts, total, loading, error, filters, pagination, unacknowledgedCount } =
   storeToRefs(alertsStore);
+const { activeStreams } = storeToRefs(streamsStore);
 
 function openIncident(incidentId: number) {
   router.push({ name: "admin-incident-detail", params: { id: incidentId } });
@@ -48,6 +51,7 @@ onMounted(() => {
   socket.on("disconnect", onSocketDisconnect);
   socket.on("violence_alert", flashCameraForAlert);
   alertsStore.fetchAlerts();
+  streamsStore.fetchStreams();
 });
 
 onBeforeUnmount(() => {
@@ -190,21 +194,13 @@ async function onSeedFive() {
   }
 }
 
-// ---------- Camera tiles (mockup for now) ----------
-// Visual scaffold for Phase 4.5. When the multi-camera grid backend
-// lands, swap `online: false` for the real online state and `feedUrl`
-// for `${apiUrl}/video_feed/<stream_id>`. The `recentAlert` flag is
-// derived from the live alerts stream: any alert in the last 5s for
-// a given camera_id flashes its tile.
-interface MockCamera {
-  name: string;
-  streamId: string;
-  location: string;
-}
-const mockCameras: MockCamera[] = [
-  { name: "Main Entrance", streamId: "CAM_01", location: "Building A" },
-];
-
+// ---------- Camera tiles ----------
+// Tiles render from the real streams store (active streams only).
+// `online` stays false until Phase 4.5 ships per-stream MJPEG endpoints;
+// at that point set online from a health signal and feedUrl to
+// `${apiUrl}/video_feed/<stream_id>`. The `recentAlert` flag is derived
+// from the live alert stream: any alert in the last 5s for a given
+// camera_id flashes its tile.
 const recentAlertCameras = ref<Set<string>>(new Set());
 
 function isCameraFlashing(streamId: string): boolean {
@@ -248,24 +244,37 @@ function flashCameraForAlert(alert: Alert) {
       </div>
     </div>
 
-    <!-- Camera tiles (visual scaffold; live feed wires in Phase 4.5) -->
+    <!-- Camera tiles (live feed wires in Phase 4.5) -->
     <Card>
       <CardHeader>
         <CardTitle>Live cameras</CardTitle>
         <CardDescription>
-          Connected camera feeds. Real-time alerts flash the corresponding tile.
+          Active camera streams. Real-time alerts flash the corresponding tile.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div
+          v-if="activeStreams.length === 0"
+          class="py-8 text-center text-sm text-muted-foreground"
+        >
+          No active cameras.
+          <RouterLink to="/admin/streams" class="underline underline-offset-2">
+            Add one
+          </RouterLink>
+          to start monitoring.
+        </div>
+        <div
+          v-else
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+        >
           <CameraTile
-            v-for="cam in mockCameras"
-            :key="cam.streamId"
+            v-for="cam in activeStreams"
+            :key="cam.id"
             :name="cam.name"
-            :stream-id="cam.streamId"
-            :location="cam.location"
+            :stream-id="cam.stream_id"
+            :location="cam.location ?? ''"
             :online="false"
-            :recent-alert="isCameraFlashing(cam.streamId)"
+            :recent-alert="isCameraFlashing(cam.stream_id)"
           />
         </div>
       </CardContent>

@@ -24,6 +24,7 @@ import {
   Activity,
   FileCode,
   Siren,
+  Video,
 } from "lucide-vue-next";
 
 /**
@@ -69,6 +70,12 @@ export const useNavigationStore = defineStore("navigation", () => {
           title: "Alerts",
           url: "/admin/alerts",
           icon: Siren,
+          isActive: false,
+        },
+        {
+          title: "Cameras",
+          url: "/admin/streams",
+          icon: Video,
           isActive: false,
         }
       ],
@@ -208,6 +215,12 @@ export const useNavigationStore = defineStore("navigation", () => {
           title: "Alerts",
           url: "/admin/alerts",
           icon: Siren,
+          isActive: false,
+        },
+        {
+          title: "Cameras",
+          url: "/admin/streams",
+          icon: Video,
           isActive: false,
         },
         {
