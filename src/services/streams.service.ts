@@ -9,17 +9,22 @@ import type {
   UpdateStreamInput,
 } from "@/types/streams";
 
+// Live-data endpoints: disable the api-client GET cache. Without this the
+// cached camera list goes stale the moment a stream is created/edited
+// elsewhere, since mutations don't invalidate the cache.
+const NO_CACHE = { cache: false } as const;
+
 /** GET /api/streams — optionally filter by active state. */
 export async function listStreams(isActive?: boolean): Promise<StreamListResponse> {
   const params: Record<string, string> = {};
   if (isActive !== undefined) params.is_active = String(isActive);
-  const { data } = await apiGet<StreamListResponse>("/api/streams", params);
+  const { data } = await apiGet<StreamListResponse>("/api/streams", params, NO_CACHE);
   return data;
 }
 
 /** GET /api/streams/<pk>. */
 export async function getStream(pk: number): Promise<Stream> {
-  const { data } = await apiGet<Stream>(`/api/streams/${pk}`);
+  const { data } = await apiGet<Stream>(`/api/streams/${pk}`, undefined, NO_CACHE);
   return data;
 }
 

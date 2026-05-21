@@ -67,6 +67,18 @@ function openEdit(stream: Stream) {
   dialogOpen.value = true;
 }
 
+/**
+ * Reka-ui controlled DialogRoot can desync its internal open-state after
+ * the first open/close cycle (the second programmatic open is dropped).
+ * The dialog is v-if-mounted, so this only handles user-initiated closes
+ * (Esc / overlay click / X button) — translate them to dialogOpen=false,
+ * which unmounts the dialog and guarantees the next open is a fresh
+ * component instance.
+ */
+function handleDialogOpenChange(open: boolean) {
+  if (!open) dialogOpen.value = false;
+}
+
 const formValid = computed(
   () =>
     form.stream_id.trim() !== "" &&
@@ -250,8 +262,10 @@ async function onDelete(stream: Stream) {
       </CardContent>
     </Card>
 
-    <!-- Add / Edit dialog -->
-    <Dialog v-model:open="dialogOpen">
+    <!-- Add / Edit dialog. v-if-mounted so every open is a fresh reka
+         DialogRoot instance — avoids the controlled-dialog stale-state
+         bug where the 2nd programmatic open is silently dropped. -->
+    <Dialog v-if="dialogOpen" :open="dialogOpen" @update:open="handleDialogOpenChange">
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{{ isEditing ? "Edit camera" : "Add camera" }}</DialogTitle>

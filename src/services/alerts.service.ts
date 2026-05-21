@@ -5,6 +5,9 @@
 import { apiGet, apiPost } from "@/services/api";
 import type { Alert, AlertsQuery, ListResponse } from "@/types/alerts";
 
+// Alerts are live data — never serve a stale cached list.
+const NO_CACHE = { cache: false } as const;
+
 /** GET /api/alerts with optional filters + pagination. */
 export async function listAlerts(query: AlertsQuery = {}): Promise<ListResponse<Alert>> {
   const params: Record<string, string | number> = {};
@@ -14,7 +17,7 @@ export async function listAlerts(query: AlertsQuery = {}): Promise<ListResponse<
   if (query.limit !== undefined) params.limit = query.limit;
   if (query.offset !== undefined) params.offset = query.offset;
 
-  const { data } = await apiGet<ListResponse<Alert>>("/api/alerts", params);
+  const { data } = await apiGet<ListResponse<Alert>>("/api/alerts", params, NO_CACHE);
   return data;
 }
 

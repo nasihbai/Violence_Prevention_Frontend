@@ -10,6 +10,9 @@ import type {
   Severity,
 } from "@/types/alerts";
 
+// Live data — never serve a stale cached incident list/detail.
+const NO_CACHE = { cache: false } as const;
+
 /** GET /api/incidents with optional filters + pagination. */
 export async function listIncidents(query: IncidentsQuery = {}): Promise<ListResponse<Incident>> {
   const params: Record<string, string | number> = {};
@@ -18,13 +21,13 @@ export async function listIncidents(query: IncidentsQuery = {}): Promise<ListRes
   if (query.limit !== undefined) params.limit = query.limit;
   if (query.offset !== undefined) params.offset = query.offset;
 
-  const { data } = await apiGet<ListResponse<Incident>>("/api/incidents", params);
+  const { data } = await apiGet<ListResponse<Incident>>("/api/incidents", params, NO_CACHE);
   return data;
 }
 
 /** GET /api/incidents/<id> — returns the incident with its embedded alerts. */
 export async function getIncident(id: number): Promise<Incident> {
-  const { data } = await apiGet<Incident>(`/api/incidents/${id}`);
+  const { data } = await apiGet<Incident>(`/api/incidents/${id}`, undefined, NO_CACHE);
   return data;
 }
 
