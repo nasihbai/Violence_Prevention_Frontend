@@ -27,6 +27,7 @@ import {
   Video,
   ClipboardList,
   MonitorPlay,
+  BarChart3,
 } from "lucide-vue-next";
 
 /**
@@ -90,6 +91,12 @@ export const useNavigationStore = defineStore("navigation", () => {
           title: "Incidents",
           url: "/admin/incidents",
           icon: ClipboardList,
+          isActive: false,
+        },
+        {
+          title: "Analytics",
+          url: "/admin/incident-analytics",
+          icon: BarChart3,
           isActive: false,
         }
       ],
@@ -247,6 +254,12 @@ export const useNavigationStore = defineStore("navigation", () => {
           title: "Incidents",
           url: "/admin/incidents",
           icon: ClipboardList,
+          isActive: false,
+        },
+        {
+          title: "Analytics",
+          url: "/admin/incident-analytics",
+          icon: BarChart3,
           isActive: false,
         },
         {

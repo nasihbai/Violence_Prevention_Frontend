@@ -66,6 +66,17 @@ export const adminRoutes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/admin/incident-analytics',
+    name: 'admin-incident-analytics',
+    component: () => import('@/pages/admin/incident-analytics/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'superadmin'],
+      layout: 'dashboard',
+      title: 'Incident Analytics'
+    }
+  },
+  {
     path: '/admin/streams',
     name: 'admin-streams',
     component: () => import('@/pages/admin/streams/index.vue'),
