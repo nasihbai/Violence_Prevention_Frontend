@@ -28,6 +28,7 @@ import {
   ClipboardList,
   MonitorPlay,
   BarChart3,
+  ScanLine,
 } from "lucide-vue-next";
 
 /**
@@ -97,6 +98,12 @@ export const useNavigationStore = defineStore("navigation", () => {
           title: "Analytics",
           url: "/admin/incident-analytics",
           icon: BarChart3,
+          isActive: false,
+        },
+        {
+          title: "Detection Activity",
+          url: "/admin/detection-activity",
+          icon: ScanLine,
           isActive: false,
         }
       ],
@@ -260,6 +267,12 @@ export const useNavigationStore = defineStore("navigation", () => {
           title: "Analytics",
           url: "/admin/incident-analytics",
           icon: BarChart3,
+          isActive: false,
+        },
+        {
+          title: "Detection Activity",
+          url: "/admin/detection-activity",
+          icon: ScanLine,
           isActive: false,
         },
         {

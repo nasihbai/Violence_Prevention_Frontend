@@ -77,6 +77,17 @@ export const adminRoutes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/admin/detection-activity',
+    name: 'admin-detection-activity',
+    component: () => import('@/pages/admin/detection-activity/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'superadmin'],
+      layout: 'dashboard',
+      title: 'Detection Activity'
+    }
+  },
+  {
     path: '/admin/streams',
     name: 'admin-streams',
     component: () => import('@/pages/admin/streams/index.vue'),
