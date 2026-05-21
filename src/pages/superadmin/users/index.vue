@@ -464,7 +464,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive } from 'vue';
+import { ref, computed, reactive, onMounted } from 'vue';
+import { listUsers, createUser as svcCreateUser, updateUser as svcUpdateUser, deactivateUser as svcDeactivateUser } from '@/services/users.service';
 import { format, parseISO, subDays, startOfWeek, startOfMonth, startOfYear } from 'date-fns';
 import { useToast } from '@/composables/useToast';
 import { useAuthStore } from '@/stores/auth';
@@ -566,58 +567,24 @@ interface User {
 
 // State
 const isLoading = ref(false);
-const users = ref<User[]>([
-  {
-    id: 1,
-    name: 'John Doe',
-    email: 'john@example.com',
-    role: 'superadmin',
-    status: 'active',
-    avatar: '',
-    created: '2023-01-10T09:00:00Z',
-    last_login: '2023-06-15T14:30:00Z',
-  },
-  {
-    id: 2,
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    role: 'admin',
-    status: 'active',
-    avatar: '',
-    created: '2023-01-15T14:30:00Z',
-    last_login: '2023-06-10T08:45:00Z',
-  },
-  {
-    id: 3,
-    name: 'Bob Johnson',
-    email: 'bob@example.com',
-    role: 'user',
-    status: 'inactive',
-    avatar: '',
-    created: '2023-02-20T11:45:00Z',
-    last_login: null,
-  },
-  {
-    id: 4,
-    name: 'Alice Williams',
-    email: 'alice@example.com',
-    role: 'user',
-    status: 'active',
-    avatar: '',
-    created: '2023-03-05T08:15:00Z',
-    last_login: '2023-05-20T16:15:00Z',
-  },
-  {
-    id: 5,
-    name: 'David Brown',
-    email: 'david@example.com',
-    role: 'admin',
-    status: 'pending',
-    avatar: '',
-    created: '2023-03-10T16:20:00Z',
-    last_login: null,
-  },
-]);
+// Real users are loaded from the BE on mount (see onMounted below).
+const users = ref<User[]>([]);
+
+async function loadUsers(): Promise<void> {
+  isLoading.value = true;
+  try {
+    users.value = await listUsers();
+  } catch (e: any) {
+    toast.error('Failed to load users', {
+      description: e?.data?.errors?._?.[0] || e?.message || 'Could not reach the server',
+    });
+    users.value = [];
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+onMounted(loadUsers);
 
 // Filters
 const searchQuery = ref('');
@@ -887,37 +854,36 @@ function validateUser(user: any, isNewUser = false): boolean {
   return isValid;
 }
 
-function createUser() {
+async function createUser() {
   if (!validateUser(newUser.value, true)) {
     return;
   }
-  
+
   isLoading.value = true;
-  
-  // Simulate API call
-  setTimeout(() => {
-    const newId = Math.max(...users.value.map(u => u.id)) + 1;
-    
-    const user = {
-      id: newId,
+  try {
+    const user = await svcCreateUser({
       name: newUser.value.name,
       email: newUser.value.email,
+      password: newUser.value.password,
       role: newUser.value.role,
       status: newUser.value.status,
-      avatar: '',
-      created: new Date().toISOString(),
-      last_login: null,
-    };
-    
-    users.value.push(user);
-    
-    toast.success('User created', {
-      description: `User ${user.name} has been created successfully${sendWelcomeEmail.value ? ' and welcome email sent' : ''}`,
     });
-    
+    users.value.push(user);
+    toast.success('User created', {
+      description: `User ${user.name} has been created successfully`,
+    });
     showCreateDialog.value = false;
+  } catch (e: any) {
+    toast.error('Could not create user', {
+      description:
+        e?.data?.errors?._?.[0] ||
+        (e?.data?.errors && Object.values(e.data.errors)[0]?.[0]) ||
+        e?.message ||
+        'Request failed',
+    });
+  } finally {
     isLoading.value = false;
-  }, 1000);
+  }
 }
 
 function editUser(user: User): void {
@@ -936,38 +902,44 @@ function editUser(user: User): void {
   showEditDialog.value = true;
 }
 
-function saveUser() {
+async function saveUser() {
   if (!validateUser(editingUser.value)) {
     return;
   }
-  
+
   isLoading.value = true;
-  
-  // Simulate API call
-  setTimeout(() => {
-    const index = users.value.findIndex(u => u.id === editingUser.value.id);
-    
-    if (index !== -1) {
-      // Create updated user object, handling the password field
-      const updatedUser = {
-        ...users.value[index],
-        name: editingUser.value.name,
-        email: editingUser.value.email,
-        role: editingUser.value.role,
-        status: editingUser.value.status,
-      };
-      
-      // Update the user in the array
-      users.value[index] = updatedUser;
-      
-      toast.success('User updated', {
-        description: `User ${updatedUser.name} has been updated successfully`,
-      });
+  try {
+    const patch: Partial<{ name: string; email: string; role: string; status: string; password: string }> = {
+      name: editingUser.value.name,
+      email: editingUser.value.email,
+      role: editingUser.value.role,
+      status: editingUser.value.status,
+    };
+    // Only send a password if the admin actually typed a new one.
+    if (editingUser.value.password) {
+      patch.password = editingUser.value.password;
     }
-    
+    const updatedUser = await svcUpdateUser(editingUser.value.id, patch);
+
+    const index = users.value.findIndex(u => u.id === updatedUser.id);
+    if (index !== -1) {
+      users.value[index] = updatedUser;
+    }
+    toast.success('User updated', {
+      description: `User ${updatedUser.name} has been updated successfully`,
+    });
     showEditDialog.value = false;
+  } catch (e: any) {
+    toast.error('Could not update user', {
+      description:
+        e?.data?.errors?._?.[0] ||
+        (e?.data?.errors && Object.values(e.data.errors)[0]?.[0]) ||
+        e?.message ||
+        'Request failed',
+    });
+  } finally {
     isLoading.value = false;
-  }, 1000);
+  }
 }
 
 function deleteUser(user: User): void {
@@ -975,30 +947,37 @@ function deleteUser(user: User): void {
   showDeleteDialog.value = true;
 }
 
-function confirmDeleteUser(): void {
+async function confirmDeleteUser(): Promise<void> {
   if (!userToDelete.value) {
     return;
   }
-  
+
   isLoading.value = true;
-  
-  // Simulate API call
-  setTimeout(() => {
-    const index = users.value.findIndex(u => u.id === userToDelete.value!.id);
-    
+  try {
+    // BE soft-deletes (is_active=false). Reflect that in place rather than
+    // removing the row, so it's clear the account still exists but is
+    // deactivated — and its incident history stays intact.
+    const updated = await svcDeactivateUser(userToDelete.value.id);
+    const index = users.value.findIndex(u => u.id === updated.id);
     if (index !== -1) {
-      const deletedUser = users.value[index];
-      users.value.splice(index, 1);
-      
-      toast.success('User deleted', {
-        description: `User ${deletedUser.name} has been deleted successfully`,
-      });
+      users.value[index] = updated;
     }
-    
+    toast.success('User deactivated', {
+      description: `User ${updated.name} has been deactivated (account and history preserved)`,
+    });
     showDeleteDialog.value = false;
     userToDelete.value = null;
+  } catch (e: any) {
+    toast.error('Could not deactivate user', {
+      description:
+        e?.data?.errors?._?.[0] ||
+        (e?.data?.errors && Object.values(e.data.errors)[0]?.[0]) ||
+        e?.message ||
+        'Request failed',
+    });
+  } finally {
     isLoading.value = false;
-  }, 1000);
+  }
 }
 
 function resetPassword(user: User): void {
