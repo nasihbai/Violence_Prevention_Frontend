@@ -91,14 +91,6 @@ const isEnabled = configService.toggleFeature('analytics');
 - `api.timeout`: Request timeout in milliseconds
 - `api.retries`: Number of retries for failed requests
 
-### Database
-
-- `database.host`: Database host
-- `database.port`: Database port
-- `database.user`: Database username
-- `database.password`: Database password
-- `database.name`: Database name
-
 ### Email
 
 - `email.plunkApiKey`: Plunk API key

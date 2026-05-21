@@ -22,6 +22,83 @@ export const adminRoutes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/admin/alerts',
+    name: 'admin-alerts',
+    component: () => import('@/pages/admin/alerts/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'superadmin'],
+      layout: 'dashboard',
+      title: 'Alerts'
+    }
+  },
+  {
+    path: '/admin/monitoring',
+    name: 'admin-monitoring',
+    component: () => import('@/pages/admin/monitoring/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'superadmin'],
+      layout: 'dashboard',
+      title: 'Live Monitoring'
+    }
+  },
+  {
+    path: '/admin/incidents',
+    name: 'admin-incidents',
+    component: () => import('@/pages/admin/incidents/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'superadmin'],
+      layout: 'dashboard',
+      title: 'Incidents'
+    }
+  },
+  {
+    path: '/admin/incidents/:id',
+    name: 'admin-incident-detail',
+    component: () => import('@/pages/admin/incidents/[id].vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'superadmin'],
+      layout: 'dashboard',
+      title: 'Incident'
+    }
+  },
+  {
+    path: '/admin/incident-analytics',
+    name: 'admin-incident-analytics',
+    component: () => import('@/pages/admin/incident-analytics/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'superadmin'],
+      layout: 'dashboard',
+      title: 'Incident Analytics'
+    }
+  },
+  {
+    path: '/admin/detection-activity',
+    name: 'admin-detection-activity',
+    component: () => import('@/pages/admin/detection-activity/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'superadmin'],
+      layout: 'dashboard',
+      title: 'Detection Activity'
+    }
+  },
+  {
+    path: '/admin/streams',
+    name: 'admin-streams',
+    component: () => import('@/pages/admin/streams/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'superadmin'],
+      layout: 'dashboard',
+      title: 'Cameras'
+    }
+  },
+  {
     path: '/admin/dashboard',
     redirect: '/admin/home',
     meta: {

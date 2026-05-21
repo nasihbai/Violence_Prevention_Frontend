@@ -1,0 +1,10 @@
+ignoredBuiltDependencies:
+  - cwebp-bin
+  - esbuild
+  - gifsicle
+  - jpegtran-bin
+  - maplibre-gl
+  - mozjpeg
+  - optipng-bin
+  - pngquant-bin
+  - vue-demi

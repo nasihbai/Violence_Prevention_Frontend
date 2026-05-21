@@ -23,6 +23,12 @@ import {
   SearchCode,
   Activity,
   FileCode,
+  Siren,
+  Video,
+  ClipboardList,
+  MonitorPlay,
+  BarChart3,
+  ScanLine,
 } from "lucide-vue-next";
 
 /**
@@ -62,6 +68,42 @@ export const useNavigationStore = defineStore("navigation", () => {
           title: "Dashboard",
           url: "/superadmin/dashboard",
           icon: LayoutDashboard,
+          isActive: false,
+        },
+        {
+          title: "Live Monitoring",
+          url: "/admin/monitoring",
+          icon: MonitorPlay,
+          isActive: false,
+        },
+        {
+          title: "Alerts",
+          url: "/admin/alerts",
+          icon: Siren,
+          isActive: false,
+        },
+        {
+          title: "Cameras",
+          url: "/admin/streams",
+          icon: Video,
+          isActive: false,
+        },
+        {
+          title: "Incidents",
+          url: "/admin/incidents",
+          icon: ClipboardList,
+          isActive: false,
+        },
+        {
+          title: "Analytics",
+          url: "/admin/incident-analytics",
+          icon: BarChart3,
+          isActive: false,
+        },
+        {
+          title: "Detection Activity",
+          url: "/admin/detection-activity",
+          icon: ScanLine,
           isActive: false,
         }
       ],
@@ -196,6 +238,42 @@ export const useNavigationStore = defineStore("navigation", () => {
           url: "/admin/home",
           icon: LayoutDashboard,
           isActive: true,
+        },
+        {
+          title: "Live Monitoring",
+          url: "/admin/monitoring",
+          icon: MonitorPlay,
+          isActive: false,
+        },
+        {
+          title: "Alerts",
+          url: "/admin/alerts",
+          icon: Siren,
+          isActive: false,
+        },
+        {
+          title: "Cameras",
+          url: "/admin/streams",
+          icon: Video,
+          isActive: false,
+        },
+        {
+          title: "Incidents",
+          url: "/admin/incidents",
+          icon: ClipboardList,
+          isActive: false,
+        },
+        {
+          title: "Analytics",
+          url: "/admin/incident-analytics",
+          icon: BarChart3,
+          isActive: false,
+        },
+        {
+          title: "Detection Activity",
+          url: "/admin/detection-activity",
+          icon: ScanLine,
+          isActive: false,
         },
         {
           title: "About",

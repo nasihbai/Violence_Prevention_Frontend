@@ -21,7 +21,7 @@ applyTo:
 - All HTTP calls use `ofetch`. Set base URL via the central client config — don't hardcode hosts.
 - Always type the response: `ofetch<AlertResponse>(...)`. No `any` return types.
 - Network errors are rethrown — let the caller (composable or store) decide UI behavior.
-- This frontend talks to TWO backends: the small in-repo Hono backend (users/sessions/alerts) AND the Python ML backend (`../FYP_Violence_Prevention_backend`, HTTP-only). Name services by which one they hit.
+- This frontend talks to ONE backend: the Python ML backend at `../FYP_Violence_Prevention_backend` (Flask, HTTP-only). The `hono` import in `api-client.ts` is a client wrapper, not a server.
 
 ## Composables (`src/composables/`)
 - `use*` naming. One concern per composable.

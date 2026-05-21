@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useConfigStore } from '@/stores/config';
 import { useToast } from '@/composables/useToast';
+import { getSettings, saveSettings } from '@/services/settings.service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -112,18 +113,37 @@ function removeCustomMetaTag(id: number) {
   toast.success('Meta tag removed successfully');
 }
 
-// Save SEO configuration
-async function saveSeoConfig() {
+// Load SEO configuration from the BE (namespace 'seo')
+async function loadSeoConfig() {
   isLoading.value = true;
-  
   try {
-    // In a real implementation, this would update the config store
-    await configStore.updateConfig('seo', seoConfig.value);
-    
-    toast.success('SEO configuration saved successfully');
+    const s = await getSettings('seo');
+    if (s && typeof s.config === 'object' && s.config) {
+      seoConfig.value = { ...seoConfig.value, ...(s.config as Record<string, unknown>) };
+    }
+    if (Array.isArray(s.metaTags)) {
+      customMetaTags.value = s.metaTags as MetaTag[];
+    }
   } catch (error) {
     console.error(error);
-    toast.error('Failed to save SEO configuration');
+    toast.error('Failed to load SEO configuration');
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+// Save SEO configuration to the BE
+async function saveSeoConfig() {
+  isLoading.value = true;
+  try {
+    await saveSettings('seo', {
+      config: seoConfig.value,
+      metaTags: customMetaTags.value,
+    });
+    toast.success('SEO configuration saved successfully');
+  } catch (error: any) {
+    console.error(error);
+    toast.error(error?.data?.errors?._?.[0] || 'Failed to save SEO configuration');
   } finally {
     isLoading.value = false;
   }
@@ -147,7 +167,7 @@ async function generateSitemap() {
 }
 
 onMounted(() => {
-  // In a real implementation, this would load from the config store
+  loadSeoConfig();
 });
 
 // Define route meta for Vue Router

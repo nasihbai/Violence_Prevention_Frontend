@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useConfigStore } from '@/stores/config';
 import { useToast } from '@/composables/useToast';
+import { getSettings, saveSettings } from '@/services/settings.service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,29 +54,18 @@ const filteredVariables = computed(() => {
   return filtered;
 });
 
-// Load environment variables
+// Load environment variables from the BE (namespace 'app', key 'variables')
 async function loadEnvironmentVariables() {
   isLoading.value = true;
-  
   try {
-    // In a real implementation, this would come from an API
-    // For now, we'll use mock data
-    envVariables.value = [
-      { key: 'APP_NAME', value: 'jBoilerplate', description: 'Application name', isSecret: false },
-      { key: 'APP_URL', value: 'http://localhost:3000', description: 'Application URL', isSecret: false },
-      { key: 'API_TIMEOUT', value: '30000', description: 'API request timeout in ms', isSecret: false },
-      { key: 'DATABASE_HOST', value: 'localhost', description: 'Database host', isSecret: false },
-      { key: 'DATABASE_PORT', value: '5432', description: 'Database port', isSecret: false },
-      { key: 'DATABASE_NAME', value: 'jboilerplate', description: 'Database name', isSecret: false },
-      { key: 'DATABASE_USER', value: 'db_user', description: 'Database username', isSecret: true },
-      { key: 'DATABASE_PASSWORD', value: '********', description: 'Database password', isSecret: true },
-      { key: 'JWT_SECRET', value: '********', description: 'JWT secret key', isSecret: true },
-      { key: 'MAILGUN_API_KEY', value: '********', description: 'Mailgun API key', isSecret: true },
-      { key: 'MAILGUN_DOMAIN', value: 'mail.example.com', description: 'Mailgun domain', isSecret: false },
-    ];
+    const s = await getSettings('app');
+    envVariables.value = Array.isArray(s.variables)
+      ? (s.variables as { key: string; value: string; description: string; isSecret: boolean }[])
+      : [];
   } catch (error) {
     console.error(error);
     toast.error('Failed to load environment variables');
+    envVariables.value = [];
   } finally {
     isLoading.value = false;
   }
@@ -130,19 +120,16 @@ function deleteEnvironmentVariable(key: string) {
   }
 }
 
-// Save all environment variables
-function saveEnvironmentVariables() {
+// Save all environment variables to the BE
+async function saveEnvironmentVariables() {
   isLoading.value = true;
-  
   try {
-    // In a real implementation, this would be an API call
-    setTimeout(() => {
-      toast.success('Environment variables saved');
-      isLoading.value = false;
-    }, 1000);
-  } catch (error) {
+    await saveSettings('app', { variables: envVariables.value });
+    toast.success('Environment variables saved');
+  } catch (error: any) {
     console.error(error);
-    toast.error('Failed to save environment variables');
+    toast.error(error?.data?.errors?._?.[0] || 'Failed to save environment variables');
+  } finally {
     isLoading.value = false;
   }
 }

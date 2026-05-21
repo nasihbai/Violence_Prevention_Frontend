@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import DashboardLayout from "@/layouts/dashboard.vue";
@@ -7,6 +7,8 @@ import BlankLayout from "@/layouts/blank.vue";
 import FormsLayout from "@/layouts/forms.vue";
 import AuthLayout from "@/layouts/auth.vue";
 import { Toaster } from "@/components/ui/sonner";
+import LoadingScreen from "@/components/LoadingScreen.vue";
+import { runBoot } from "@/boot";
 
 const route = useRoute();
 const router = useRouter();
@@ -24,10 +26,31 @@ const layout = computed<"dashboard" | "blank" | "forms" | "auth">(() => {
   return currentLayout;
 });
 
-onMounted(() => {
-  console.log("App mounted with route:", route.path);
-  console.log("Current layout:", layout.value);
-  console.log("Authentication status:", authStore.isAuthenticated ? "Authenticated" : "Not authenticated");
+// ── Boot / loading screen ──────────────────────────────────────────
+// The LoadingScreen covers the app until boot (auth session restore)
+// finishes. A minimum splash time keeps the screen visible long enough
+// to see its animation even when boot is near-instant.
+const appReady = ref(false);
+const bootProgress = ref(8);
+
+onMounted(async () => {
+  const ticker = window.setInterval(() => {
+    if (bootProgress.value < 90) {
+      bootProgress.value = Math.min(90, bootProgress.value + Math.random() * 14);
+    }
+  }, 130);
+
+  const minSplash = new Promise<void>((resolve) => window.setTimeout(resolve, 1400));
+  try {
+    await Promise.all([runBoot(), minSplash]);
+  } catch (error) {
+    console.error("Boot failed:", error);
+  } finally {
+    window.clearInterval(ticker);
+    bootProgress.value = 100;
+    // brief beat so the progress ring visibly completes at 100%
+    window.setTimeout(() => { appReady.value = true; }, 300);
+  }
 });
 
 watch(route, (newRoute) => {
@@ -50,10 +73,13 @@ const layouts = {
 
 <template>
   <Toaster position="top-right" />
-  <component :is="layouts[layout]">
+
+  <LoadingScreen v-if="!appReady" :progress="Math.round(bootProgress)" />
+
+  <component v-else :is="layouts[layout]">
     <router-view v-slot="{ Component }">
-      <transition 
-        name="slide-in" 
+      <transition
+        name="slide-in"
         mode="out-in"
         appear
       >

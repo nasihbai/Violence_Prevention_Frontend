@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useConfigStore } from '@/stores/config';
 import { useToast } from '@/composables/useToast';
+import { getSettings, saveSettings } from '@/services/settings.service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -132,23 +133,42 @@ function loadTemplate(templateId: string) {
   }, 500);
 }
 
-// Save email configuration
-async function saveEmailConfig() {
+// Load email configuration from the BE (namespace 'email')
+async function loadEmailConfig() {
   isLoading.value = true;
-  
   try {
-    // In a real implementation, this would update the config store
-    await configStore.updateConfig('email', {
-      provider: providerType.value,
-      from: emailConfig.value.from,
-      smtp: emailConfig.value.smtp,
-      plunk: emailConfig.value.plunk
-    });
-    
-    toast.success('Email configuration saved successfully');
+    const s = await getSettings('email');
+    if (s && typeof s.config === 'object' && s.config) {
+      const c = s.config as Record<string, any>;
+      if (c.from !== undefined) emailConfig.value.from = c.from;
+      if (c.smtp) emailConfig.value.smtp = c.smtp;
+      if (c.plunk) emailConfig.value.plunk = c.plunk;
+      if (c.provider === 'smtp' || c.provider === 'plunk') providerType.value = c.provider;
+    }
   } catch (error) {
     console.error(error);
-    toast.error('Failed to save email configuration');
+    toast.error('Failed to load email configuration');
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+// Save email configuration to the BE
+async function saveEmailConfig() {
+  isLoading.value = true;
+  try {
+    await saveSettings('email', {
+      config: {
+        provider: providerType.value,
+        from: emailConfig.value.from,
+        smtp: emailConfig.value.smtp,
+        plunk: emailConfig.value.plunk,
+      },
+    });
+    toast.success('Email configuration saved successfully');
+  } catch (error: any) {
+    console.error(error);
+    toast.error(error?.data?.errors?._?.[0] || 'Failed to save email configuration');
   } finally {
     isLoading.value = false;
   }
@@ -212,8 +232,7 @@ function insertVariable(variable: string) {
 }
 
 onMounted(() => {
-  // In a real implementation, this would load from the config store
-  providerType.value = 'smtp';
+  loadEmailConfig();
 });
 
 // Define route meta for Vue Router

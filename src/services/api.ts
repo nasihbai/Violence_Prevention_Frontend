@@ -21,11 +21,13 @@ const deduplication = useRequestDeduplication({
   debug: process.env.NODE_ENV === 'development'
 });
 
-// Environment configuration
+// Environment configuration. apiUrl is the BASE URL (no path prefix);
+// each endpoint string passed to api() includes its own prefix
+// (/auth/* for auth, /api/* for data, etc.).
 const environments: Record<string, Environment> = {
   development: {
     name: "Development",
-    apiUrl: "http://localhost:3000/api",
+    apiUrl: "http://localhost:5000",
   },
   staging: {
     name: "Staging",
@@ -37,14 +39,16 @@ const environments: Record<string, Environment> = {
   },
 };
 
-// Get API URL based on environment
+// Get API URL based on environment.
+// Precedence: VITE_API_URL env > window.API_URL runtime override > environment map default.
 export const getApiUrl = (): string => {
-  // Use window.API_URL if available (for backward compatibility)
-  if (window.API_URL) {
+  const envUrl = import.meta.env.VITE_API_URL as string | undefined;
+  if (envUrl) return envUrl;
+
+  if (typeof window !== "undefined" && window.API_URL) {
     return window.API_URL;
   }
-  
-  // Otherwise use environment variable with fallback
+
   const env = process.env.NODE_ENV || "development";
   return environments[env]?.apiUrl || environments.development.apiUrl;
 };
@@ -130,6 +134,34 @@ export function invalidateApiCache(pattern?: string): void {
     console.log('Invalidating all API cache');
     cache.clear();
   }
+}
+
+/**
+ * Unwrap an ApiResponse — return `.data` on success, THROW on error.
+ *
+ * The api() function and its apiGet/apiPost/... helpers return errors as
+ * VALUES (an ApiResponse with status >= 400), not exceptions. A caller
+ * that only destructures `.data` therefore can't tell a failure from a
+ * success — it just gets an empty object. Service modules pass every
+ * response through unwrap() so a failed request becomes a real throw
+ * that stores/components can catch.
+ *
+ * The thrown error carries `.status` and `.data.{errors,message}` so the
+ * existing `e?.data?.errors?._?.[0]` error-reading pattern keeps working.
+ */
+export function unwrap<T>(res: ApiResponse<T>): T {
+  if (res.status >= 400) {
+    const err = new Error(
+      res.message || `Request failed (${res.status})`,
+    ) as Error & {
+      status?: number;
+      data?: { errors?: Record<string, string[]>; message?: string };
+    };
+    err.status = res.status;
+    err.data = { errors: res.errors, message: res.message };
+    throw err;
+  }
+  return res.data;
 }
 
 // Main API function

@@ -2,29 +2,19 @@ import { defineStore } from "pinia";
 import { ref, computed, markRaw } from "vue";
 import { useRouter, Router } from "vue-router";
 import { ofetch } from "ofetch";
-import { exampleUsers, getMockCredentials } from "@/constants/example-users";
-import { 
-  type User, 
-  type LoginCredentials, 
-  type SSOCredentials, 
-  type AuthResponse,
-  type CSRFToken,
+import {
+  type User,
+  type LoginCredentials,
+  type SSOCredentials,
   type UserRole
 } from "@/types/auth";
 import { apiPost } from "@/services/api";
 
 const getApiUrl = (): string => {
-  if (window.API_URL) {
-    return window.API_URL;
-  }
-  
-  const env = process.env.NODE_ENV || "development";
-  const environments = {
-    development: "http://localhost:3000/api",
-    staging: "https://staging-api.example.com",
-    production: "https://api.example.com",
-  };
-  return environments[env as keyof typeof environments] || environments.development;
+  const envUrl = import.meta.env.VITE_API_URL as string | undefined;
+  if (envUrl) return envUrl;
+  if (typeof window !== "undefined" && window.API_URL) return window.API_URL;
+  return "http://localhost:5000";
 };
 
 /**
@@ -103,85 +93,60 @@ export const useAuthStore = defineStore("auth", () => {
   };
 
   /**
-   * Get CSRF token from the server
+   * CSRF token fetcher.
+   *
+   * Disabled: the Python backend does not implement CSRF token issuance
+   * (deferred to Phase 6 / hardening). Returns an empty string so existing
+   * callers continue to work without crashing. The api.ts header builder
+   * skips the X-CSRF-TOKEN header when the value is empty/missing.
    */
   const fetchCSRFToken = async (): Promise<string> => {
-    try {
-      // First try to get from localStorage to avoid API call if possible
-      const storedToken = localStorage.getItem("csrf_token");
-      if (storedToken) {
-        csrfToken.value = storedToken;
-        return storedToken;
-      }
-      
-      try {
-        const response = await ofetch<CSRFToken>(`${getApiUrl()}/auth/csrf-token`, {
-          method: "GET",
-          credentials: "include",
-          timeout: 3000, // Add timeout to fail faster
-        });
-        
-        csrfToken.value = response.token;
-        localStorage.setItem("csrf_token", response.token);
-        return response.token;
-      } catch (error) {
-        console.error("Failed to fetch CSRF token:", error);
-        // Generate a mock token when API is not available
-        const mockToken = `mock_csrf_${Date.now()}`;
-        csrfToken.value = mockToken;
-        localStorage.setItem("csrf_token", mockToken);
-        return mockToken;
-      }
-    } catch (error) {
-      console.error("Error in fetchCSRFToken:", error);
-      return "";
-    }
+    return "";
   };
 
   /**
-   * Initialize the auth store
+   * Initialize the auth store on app boot. Restores from localStorage and
+   * validates the saved token by hitting /auth/me. Falls back to a clean
+   * logout if the token is rejected.
    */
   const init = async (): Promise<void> => {
-    // Try to load user from localStorage
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
-      user.value = JSON.parse(storedUser);
+      try {
+        user.value = JSON.parse(storedUser);
+      } catch {
+        // Corrupt entry; clear it
+        localStorage.removeItem("user");
+      }
     }
-    
-    // Try to load tokens
+
     const storedAccessToken = localStorage.getItem("access_token");
-    const storedCSRFToken = localStorage.getItem("csrf_token");
-    
     if (storedAccessToken) {
       accessToken.value = storedAccessToken;
     }
-    
-    if (storedCSRFToken) {
-      csrfToken.value = storedCSRFToken;
-    }
-    
-    // If we have tokens but no user, try to fetch user data
-    if (accessToken.value && !user.value) {
+
+    // Validate the token against /auth/me — refreshes the user shape too
+    if (accessToken.value) {
       try {
         await fetchUserData();
-      } catch (error) {
-        // If we can't get user data, clear the tokens
+      } catch {
         clearAuthData();
       }
     }
-    
-    // Fetch a new CSRF token if needed
-    if (!csrfToken.value) {
-      await fetchCSRFToken();
-    }
-    
-    // Initialize impersonation state
+
+    // Impersonation state (kept for FE features; unrelated to BE auth)
     const isImpersonating = localStorage.getItem("impersonating") === "true";
     const storedOriginalUser = localStorage.getItem("original_user");
-    
+
     if (isImpersonating && storedOriginalUser) {
       impersonating.value = true;
-      originalUser.value = JSON.parse(storedOriginalUser);
+      try {
+        originalUser.value = JSON.parse(storedOriginalUser);
+      } catch {
+        localStorage.removeItem("original_user");
+        localStorage.removeItem("impersonating");
+        impersonating.value = false;
+      }
     }
   };
 
@@ -213,44 +178,38 @@ export const useAuthStore = defineStore("auth", () => {
   };
 
   /**
-   * Login with email and password
+   * Login with email and password. Calls POST /auth/login on the Python BE.
+   *
+   * BE response shape: { access_token: string, user: { id, fullname, email, user_type, avatar } }
+   * Uses ofetch directly (not the apiPost wrapper) so the wrapper's 401-retry
+   * logic doesn't try to refresh-then-logout when the failure IS the login attempt.
    */
   async function login(credentials: LoginCredentials): Promise<void> {
     isLoading.value = true;
     error.value = null;
 
     try {
-      // For the boilerplate, we're using mock authentication
-      // In a real app, you would call the API
-      const matchedUser = exampleUsers.find(u => u.email === credentials.email);
-      const mockCreds = matchedUser ? getMockCredentials(matchedUser) : null;
+      const response = await ofetch<{ access_token: string; user: User }>(
+        `${getApiUrl()}/auth/login`,
+        {
+          method: "POST",
+          body: { email: credentials.email, password: credentials.password },
+        }
+      );
 
-      if (!matchedUser || credentials.password !== mockCreds?.password) {
-        throw new Error("Invalid email or password");
+      if (!response?.access_token || !response?.user) {
+        throw new Error("Server returned no access token");
       }
 
-      // Simulate a response from the server
-      const data = {
-        accessToken: `mock_token_${matchedUser.id}`,
-        user: matchedUser
-      };
+      accessToken.value = response.access_token;
+      user.value = response.user;
 
-      // In a real app, the token would be returned by the API
-      // and the access token would be set as an HTTP-only cookie
-      accessToken.value = data.accessToken;
-      user.value = data.user;
-
-      // Store data in localStorage
-      if (accessToken.value) {
-        localStorage.setItem("access_token", accessToken.value);
-        localStorage.setItem("user", JSON.stringify(user.value));
-      }
-
-      // Fetch CSRF token for future requests
-      await fetchCSRFToken();
+      localStorage.setItem("access_token", response.access_token);
+      localStorage.setItem("user", JSON.stringify(response.user));
     } catch (e: any) {
       console.error("Login error:", e);
-      error.value = e.message || "Login failed";
+      const beMsg = e?.data?.errors?._?.[0] || e?.data?.message || e?.data?.msg;
+      error.value = beMsg || e?.message || "Login failed";
       throw e;
     } finally {
       isLoading.value = false;
@@ -258,114 +217,53 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   /**
-   * Login with a social provider
+   * SSO login.
+   *
+   * Disabled: the Python backend does not implement /auth/sso/* endpoints
+   * (deferred to Phase 6 / hardening). Throws so calling UI shows a clear
+   * error instead of silently failing.
    */
-  async function loginWithSSO(credentials: SSOCredentials): Promise<void> {
-    isLoading.value = true;
-    error.value = null;
-
-    try {
-      // Get CSRF token first
-      await fetchCSRFToken();
-      
-      // Call the SSO endpoint
-      const data = await ofetch<AuthResponse>(
-        `${getApiUrl()}/auth/sso/${credentials.provider}`,
-        {
-          method: "POST",
-          body: {
-            token: credentials.token,
-          },
-          headers: {
-            "X-CSRF-TOKEN": csrfToken.value || "",
-          },
-          credentials: "include",
-        }
-      );
-
-      // Set authentication data
-      accessToken.value = data.tokens.access_token;
-      user.value = data.user;
-
-      // Store data
-      if (accessToken.value) {
-        localStorage.setItem("access_token", accessToken.value);
-        localStorage.setItem("user", JSON.stringify(user.value));
-      }
-    } catch (e: any) {
-      console.error("SSO Login error:", e);
-      error.value = e.data?.message || "SSO login failed";
-      throw e;
-    } finally {
-      isLoading.value = false;
-    }
+  async function loginWithSSO(_credentials: SSOCredentials): Promise<void> {
+    const msg = "SSO login is not enabled in this build.";
+    error.value = msg;
+    throw new Error(msg);
   }
 
   /**
-   * Refresh the access token using the HTTP-only refresh token cookie
+   * Refresh access token.
+   *
+   * Disabled: the backend does not implement /auth/refresh-token yet
+   * (single long-lived JWT is acceptable for demo per the wiring plan).
+   * Returns null so the 401-retry path in services/api.ts falls through
+   * to logout, which is the right behavior for an expired token.
    */
   async function refreshAccessToken(): Promise<string | null> {
-    try {
-      // Get a new CSRF token
-      await fetchCSRFToken();
-      
-      // Call the refresh token endpoint
-      const data = await ofetch<{ accessToken: string }>(
-        `${getApiUrl()}/auth/refresh-token`,
-        {
-          method: "POST",
-          credentials: "include", // Important for cookies
-          headers: {
-            "X-CSRF-TOKEN": csrfToken.value || "",
-          },
-        }
-      );
-
-      accessToken.value = data.accessToken;
-      localStorage.setItem("access_token", data.accessToken);
-      return data.accessToken;
-    } catch (error) {
-      console.error("Token refresh failed:", error);
-      logout();
-      return null;
-    }
+    return null;
   }
 
   /**
-   * Logout the user and clear all authentication data
+   * Logout. Fire-and-forget POST /auth/logout, then drop local auth state
+   * and redirect to the login page regardless of whether the server call
+   * succeeded — local state is the source of truth for "logged out".
    */
   async function logout(): Promise<void> {
-    try {
-      // Only call the API if we have an access token (we're logged in)
-      if (accessToken.value) {
-        try {
-          // Try to call logout endpoint to invalidate refresh token
-          // Use a short timeout to avoid long waits if the API is down
-          await ofetch(`${getApiUrl()}/auth/logout`, {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              Authorization: `Bearer ${accessToken.value || ""}`,
-              "X-CSRF-TOKEN": csrfToken.value || "",
-            },
-            timeout: 2000, // Add a 2 second timeout
-          });
-        } catch (error) {
-          console.error("Logout API call failed:", error);
-          // Continue with local logout even if API call fails
-        }
+    if (accessToken.value) {
+      try {
+        await ofetch(`${getApiUrl()}/auth/logout`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${accessToken.value}` },
+          timeout: 2000,
+        });
+      } catch (e) {
+        console.warn("Logout API call failed (continuing with local logout):", e);
       }
-    } catch (error) {
-      console.error("Logout error:", error);
-    } finally {
-      // Clear local state regardless of server response
-      clearAuthData();
-      
-      // Only redirect if router is available
-      const routerInstance = getRouter();
-      if (routerInstance) {
-        routerInstance.push("/login");
-      }
+    }
+
+    clearAuthData();
+
+    const routerInstance = getRouter();
+    if (routerInstance) {
+      routerInstance.push("/login");
     }
   }
 

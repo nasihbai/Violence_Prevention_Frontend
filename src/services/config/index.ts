@@ -10,14 +10,6 @@ export interface AppConfig {
     timeout: number;
     retries: number;
   };
-  database: {
-    client: string;
-    host: string;
-    port: number;
-    user: string;
-    password: string;
-    name: string;
-  };
   email: {
     plunkApiKey: string;
     defaultFromEmail: string;
@@ -36,17 +28,10 @@ export interface AppConfig {
 const defaultConfig: AppConfig = {
   environment: 'development',
   api: {
-    url: 'http://localhost:3000/api',
+    // Base URL only — endpoints carry their own prefix (/auth, /api).
+    url: 'http://localhost:5000',
     timeout: 30000,
     retries: 3,
-  },
-  database: {
-    client: 'pg',
-    host: 'localhost',
-    port: 5432,
-    user: 'postgres',
-    password: 'postgres',
-    name: 'jboilerplate_dev',
   },
   email: {
     plunkApiKey: '',
@@ -78,14 +63,6 @@ const loadConfigFromEnv = (): Partial<AppConfig> => {
       url: import.meta.env.VITE_API_URL || defaultConfig.api.url,
       timeout: Number(import.meta.env.VITE_API_TIMEOUT) || defaultConfig.api.timeout,
       retries: Number(import.meta.env.VITE_API_RETRIES) || defaultConfig.api.retries,
-    },
-    database: {
-      client: import.meta.env.VITE_DB_CLIENT || defaultConfig.database.client,
-      host: import.meta.env.VITE_DB_HOST || defaultConfig.database.host,
-      port: Number(import.meta.env.VITE_DB_PORT) || defaultConfig.database.port,
-      user: import.meta.env.VITE_DB_USER || defaultConfig.database.user,
-      password: import.meta.env.VITE_DB_PASSWORD || defaultConfig.database.password,
-      name: import.meta.env.VITE_DB_NAME || defaultConfig.database.name,
     },
     email: {
       plunkApiKey: import.meta.env.VITE_PLUNK_API_KEY || defaultConfig.email.plunkApiKey,
@@ -122,7 +99,6 @@ export class ConfigService {
     if (this._config.environment === 'development') {
       console.log('[Config] Initialized with:', {
         ...this._config,
-        database: { ...this._config.database, password: '***' }, // Hide sensitive data
         email: { ...this._config.email, plunkApiKey: '***' }, // Hide sensitive data
       });
     }
@@ -169,13 +145,6 @@ export class ConfigService {
    */
   get api(): AppConfig['api'] {
     return this._config.api;
-  }
-
-  /**
-   * Get database configuration
-   */
-  get database(): AppConfig['database'] {
-    return this._config.database;
   }
 
   /**
