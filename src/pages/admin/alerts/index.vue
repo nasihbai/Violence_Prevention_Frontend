@@ -7,6 +7,7 @@ import { useAlertsStore } from "@/stores/alerts";
 import { useStreamsStore } from "@/stores/streams";
 import { useSocket } from "@/composables/useSocket";
 import { fireTestAlert } from "@/services/alerts.service";
+import { getApiUrl } from "@/services/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -196,12 +197,20 @@ async function onSeedFive() {
 
 // ---------- Camera tiles ----------
 // Tiles render from the real streams store (active streams only).
-// `online` stays false until Phase 4.5 ships per-stream MJPEG endpoints;
-// at that point set online from a health signal and feedUrl to
-// `${apiUrl}/video_feed/<stream_id>`. The `recentAlert` flag is derived
-// from the live alert stream: any alert in the last 5s for a given
-// camera_id flashes its tile.
+//
+// The BE exposes ONE global MJPEG feed at /video_feed (the source the
+// detector was started with). Until Phase 4.5 adds per-stream feeds, we
+// designate the FIRST active camera as the "live" tile and point it at
+// /video_feed; the rest stay offline placeholders. The `recentAlert`
+// flag is derived from the live alert stream: any alert in the last 5s
+// for a given camera_id flashes its tile.
 const recentAlertCameras = ref<Set<string>>(new Set());
+
+/** The single MJPEG endpoint the running detector serves. */
+const videoFeedUrl = computed(() => `${getApiUrl()}/video_feed`);
+
+/** First active camera is treated as the one the detector is monitoring. */
+const liveStreamId = computed(() => activeStreams.value[0]?.stream_id ?? null);
 
 function isCameraFlashing(streamId: string): boolean {
   return recentAlertCameras.value.has(streamId);
@@ -249,7 +258,9 @@ function flashCameraForAlert(alert: Alert) {
       <CardHeader>
         <CardTitle>Live cameras</CardTitle>
         <CardDescription>
-          Active camera streams. Real-time alerts flash the corresponding tile.
+          The primary camera shows the live detector feed. Real-time alerts
+          flash the corresponding tile. Per-camera feeds arrive with the
+          multi-camera grid.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -273,7 +284,8 @@ function flashCameraForAlert(alert: Alert) {
             :name="cam.name"
             :stream-id="cam.stream_id"
             :location="cam.location ?? ''"
-            :online="false"
+            :online="cam.stream_id === liveStreamId"
+            :feed-url="cam.stream_id === liveStreamId ? videoFeedUrl : ''"
             :recent-alert="isCameraFlashing(cam.stream_id)"
           />
         </div>

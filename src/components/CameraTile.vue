@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import { Badge } from "@/components/ui/badge";
 import { Video, VideoOff, AlertTriangle } from "lucide-vue-next";
 
@@ -32,7 +32,17 @@ const props = withDefaults(defineProps<Props>(), {
   recentAlert: false,
 });
 
-const showFeed = computed(() => props.online && !!props.feedUrl);
+// If the MJPEG <img> fails to load (BE down, detector not running,
+// wrong URL) fall back to the placeholder instead of a broken-image icon.
+const feedFailed = ref(false);
+watch(
+  () => [props.feedUrl, props.online],
+  () => {
+    feedFailed.value = false; // retry on prop change
+  },
+);
+
+const showFeed = computed(() => props.online && !!props.feedUrl && !feedFailed.value);
 </script>
 
 <template>
@@ -47,6 +57,7 @@ const showFeed = computed(() => props.online && !!props.feedUrl);
         :src="feedUrl"
         :alt="`Live feed from ${name}`"
         class="w-full h-full object-cover"
+        @error="feedFailed = true"
       />
       <!-- Placeholder when offline / no feed yet -->
       <div
