@@ -4,7 +4,7 @@ import router from "./router";
 import i18n from "./plugins/i18n";
 import analyticsPlugin from "./plugins/analytics";
 import configPlugin from "./plugins/config";
-import { useAuthStore } from "./stores/auth";
+import { runBoot } from "./boot";
 import App from "./App.vue";
 import "./assets/index.css";
 import "./assets/transitions.css";
@@ -49,33 +49,14 @@ if (savedLocale && ['en', 'es'].includes(savedLocale)) {
   i18n.global.locale.value = savedLocale as 'en' | 'es';
 }
 
-// Initialize the auth store after router setup
-const authStore = useAuthStore();
-console.log("Initializing auth store...");
+// Kick off boot (auth session restore). Calling it here, before mount,
+// means the synchronous part — restoring token + user from localStorage —
+// runs before the router resolves its first route, so guards see the
+// correct auth state (no login-page flash for a logged-in user). The
+// async token validation continues in the background; App.vue awaits the
+// same promise to drive the loading screen.
+runBoot();
 
-authStore.init().then(() => {
-  console.log("Auth store initialized successfully.");
-  console.log("Auth state:", { 
-    isAuthenticated: authStore.isAuthenticated,
-    userType: authStore.user?.user_type || 'none'
-  });
-  
-  // Mount the app after auth initialization
-  app.mount("#app");
-  console.log("Application mounted successfully.");
-  
-  // Let the router handle redirection
-  const currentPath = window.location.pathname;
-  if (currentPath === '/' || currentPath === '') {
-    console.log("Detected root path, letting router handle redirection");
-    router.replace('/');
-  }
-}).catch(error => {
-  console.error("Failed to initialize auth store:", error);
-  // Still mount the app even if auth init fails
-  app.mount("#app");
-  console.log("Application mounted with auth initialization error.");
-  
-  // Force navigation to login on error
-  router.replace('/login');
-});
+// Mount immediately. App.vue renders the LoadingScreen until boot resolves.
+app.mount("#app");
+console.log("Application mounted.");
