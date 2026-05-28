@@ -172,5 +172,16 @@ export const adminRoutes: RouteRecordRaw[] = [
       layout: 'dashboard',
       title: 'API Access'
     }
+  },
+  {
+    path: '/admin/review',
+    name: 'admin-review',
+    component: () => import('@/pages/admin/review/index.vue'),
+    meta: {
+      requiresAuth: true,
+      roles: ['admin', 'superadmin'],
+      layout: 'dashboard',
+      title: 'Review Queue'
+    }
   }
 ]; 

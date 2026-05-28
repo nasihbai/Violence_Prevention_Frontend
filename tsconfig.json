@@ -12,6 +12,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "module": "esnext"
+    "module": "esnext",
+    "moduleResolution": "bundler"
   }
 }

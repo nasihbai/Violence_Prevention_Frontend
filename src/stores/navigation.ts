@@ -29,6 +29,7 @@ import {
   MonitorPlay,
   BarChart3,
   ScanLine,
+  CheckCircle,
 } from "lucide-vue-next";
 
 /**
@@ -104,6 +105,12 @@ export const useNavigationStore = defineStore("navigation", () => {
           title: "Detection Activity",
           url: "/admin/detection-activity",
           icon: ScanLine,
+          isActive: false,
+        },
+        {
+          title: "Review Queue",
+          url: "/admin/review",
+          icon: CheckCircle,
           isActive: false,
         }
       ],
@@ -273,6 +280,12 @@ export const useNavigationStore = defineStore("navigation", () => {
           title: "Detection Activity",
           url: "/admin/detection-activity",
           icon: ScanLine,
+          isActive: false,
+        },
+        {
+          title: "Review Queue",
+          url: "/admin/review",
+          icon: CheckCircle,
           isActive: false,
         },
         {
