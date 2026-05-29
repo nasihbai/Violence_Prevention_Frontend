@@ -16,6 +16,10 @@ COPY package.json pnpm-lock.yaml ./
 # Install dependencies (skip scripts to avoid prepare script issues)
 RUN pnpm install --no-frozen-lockfile --ignore-scripts
 
+# Accept the API URL at build time so it gets baked into the JS bundle
+ARG VITE_API_URL=http://localhost:5000
+ENV VITE_API_URL=$VITE_API_URL
+
 # Copy source code
 COPY . .
 
