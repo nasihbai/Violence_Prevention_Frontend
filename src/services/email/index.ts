@@ -111,15 +111,15 @@ export class EmailService {
     
     // For now, we'll use a simple HTML body
     const body = `
-      <h1>Welcome to jBoilerplate, ${name}!</h1>
+      <h1>Welcome to EYES of Soteria, ${name}!</h1>
       <p>Thank you for joining our platform. We're excited to have you on board.</p>
       <p>If you have any questions or need assistance, feel free to reply to this email.</p>
-      <p>Best regards,<br>The jBoilerplate Team</p>
+      <p>Best regards,<br>The EYES of Soteria Team</p>
     `;
 
     return this.sendEmail({
       to,
-      subject: 'Welcome to jBoilerplate!',
+      subject: 'Welcome to EYES of Soteria!',
       body,
       ...options
     });
@@ -139,7 +139,7 @@ export class EmailService {
       <p><a href="${resetLink}">Reset Password</a></p>
       <p>If you didn't request this, you can safely ignore this email.</p>
       <p>This link will expire in 1 hour.</p>
-      <p>Best regards,<br>The jBoilerplate Team</p>
+      <p>Best regards,<br>The EYES of Soteria Team</p>
     `;
 
     return this.sendEmail({

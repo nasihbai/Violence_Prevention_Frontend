@@ -123,8 +123,8 @@ export interface AppConfig {
  */
 export const defaultConfig: AppConfig = {
   app: {
-    name: 'jBoilerplate',
-    description: 'A Vue 3 Boilerplate with TypeScript and Tailwind CSS',
+    name: 'EYES of Soteria',
+    description: 'AI-powered violence detection and safety monitoring system',
     version: '1.0.0',
     defaultLanguage: 'en',
     defaultTimezone: 'UTC',
@@ -144,7 +144,7 @@ export const defaultConfig: AppConfig = {
     sessionTimeout: 86400, // 24 hours in seconds
     login: {
       backgroundImage: '/images/auth-background.jpg',
-      title: 'Welcome to jBoilerplate',
+      title: 'Welcome to EYES of Soteria',
       subtitle: 'Sign in to your account to continue',
     },
   },
@@ -185,8 +185,8 @@ export const defaultConfig: AppConfig = {
     },
   },
   seo: {
-    metaTitle: 'jBoilerplate - Vue 3 Starter Template',
-    metaDescription: 'A production-ready Vue 3 boilerplate with TypeScript, Tailwind CSS and more.',
+    metaTitle: 'EYES of Soteria - Violence Detection System',
+    metaDescription: 'AI-powered violence detection and safety monitoring for schools and public spaces.',
     ogImage: '/images/og-image.jpg',
     robotsTxt: 'User-agent: *\nAllow: /',
     enableSitemap: true,

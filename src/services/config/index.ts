@@ -35,7 +35,7 @@ const defaultConfig: AppConfig = {
   },
   email: {
     plunkApiKey: '',
-    defaultFromEmail: 'no-reply@jboilerplate.com',
+    defaultFromEmail: 'no-reply@soteria.local',
   },
   analytics: {
     umamiWebsiteId: '',
@@ -276,8 +276,8 @@ export interface UIConfig {
  */
 const defaultUIConfig: UIConfig = {
   app: {
-    name: 'jBoilerplate',
-    url: 'http://localhost:3000',
+    name: 'EYES of Soteria',
+    url: 'http://localhost:3001',
     adminEmail: 'admin@example.com',
     environment: 'development',
     debug: true,
@@ -291,7 +291,7 @@ const defaultUIConfig: UIConfig = {
   mail: {
     driver: 'smtp',
     fromAddress: 'no-reply@example.com',
-    fromName: 'jBoilerplate',
+    fromName: 'EYES of Soteria',
     host: 'smtp.example.com',
     port: 587,
     username: '',

@@ -87,10 +87,10 @@ function navigateTo(path: string) {
         <div class="relative z-20 mt-auto">
           <div class="space-y-2">
             <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-white">
-              jBoilerplate
+              EYES of Soteria
             </h1>
             <p class="text-slate-300">
-              A reusable Vue 3 boilerplate with TypeScript and Shadcn UI
+              AI-powered violence detection &amp; safety monitoring
             </p>
           </div>
         </div>

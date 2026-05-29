@@ -1,7 +1,7 @@
 {
-    "name": "He & She Admin",
-    "short_name": "He & She Admin",
-    "description": "A modern web application for He & She Admin",
+    "name": "EYES of Soteria",
+    "short_name": "Soteria",
+    "description": "AI-powered violence detection and safety monitoring system",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",

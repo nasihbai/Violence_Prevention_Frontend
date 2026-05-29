@@ -27,9 +27,9 @@ const router = createRouter({
 // Navigation guard for authentication and role-based access
 router.beforeEach(async (to, from, next) => {
   // Set document title based on route metadata
-  const defaultTitle = "jBoilerplate";
-  document.title = to.meta.title 
-    ? `${to.meta.title} | ${defaultTitle}` 
+  const defaultTitle = "EYES of Soteria";
+  document.title = to.meta.title
+    ? `${to.meta.title} | ${defaultTitle}`
     : defaultTitle;
 
   const authStore = useAuthStore();

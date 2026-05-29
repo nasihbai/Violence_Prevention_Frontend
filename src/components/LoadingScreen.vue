@@ -14,8 +14,8 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   message: 'Memuatkan...',
   progress: 0,
-  title: 'Violence Prevention',
-  subtitle: 'Detection & Monitoring System',
+  title: 'EYES of Soteria',
+  subtitle: 'Violence Detection & Monitoring',
 });
 
 const showMessage = ref(false);

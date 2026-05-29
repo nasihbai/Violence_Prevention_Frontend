@@ -21,7 +21,7 @@ const providerType = ref<'smtp' | 'plunk'>('smtp');
 
 // Email configuration
 const emailConfig = ref({
-  from: 'noreply@jboilerplate.com',
+  from: 'noreply@eyes-of-soteria.com',
   smtp: {
     host: 'smtp.example.com',
     port: 587,
@@ -46,10 +46,10 @@ const templates = [
 ];
 
 const selectedTemplate = ref(templates[0].id);
-const templateSubject = ref('Welcome to jBoilerplate');
-const templateContent = ref(`<h1>Welcome to jBoilerplate!</h1>
+const templateSubject = ref('Welcome to EYES of Soteria');
+const templateContent = ref(`<h1>Welcome to EYES of Soteria!</h1>
 <p>Hello {{user.name}},</p>
-<p>Thank you for registering with jBoilerplate. Your account has been created successfully.</p>
+<p>Thank you for registering with EYES of Soteria. Your account has been created successfully.</p>
 <p>Your login details:</p>
 <ul>
   <li>Email: {{user.email}}</li>
@@ -81,10 +81,10 @@ function loadTemplate(templateId: string) {
   setTimeout(() => {
     switch(templateId) {
       case 'registration':
-        templateSubject.value = 'Welcome to jBoilerplate';
-        templateContent.value = `<h1>Welcome to jBoilerplate!</h1>
+        templateSubject.value = 'Welcome to EYES of Soteria';
+        templateContent.value = `<h1>Welcome to EYES of Soteria!</h1>
 <p>Hello {{user.name}},</p>
-<p>Thank you for registering with jBoilerplate. Your account has been created successfully.</p>
+<p>Thank you for registering with EYES of Soteria. Your account has been created successfully.</p>
 <p>Your login details:</p>
 <ul>
   <li>Email: {{user.email}}</li>
@@ -114,18 +114,18 @@ function loadTemplate(templateId: string) {
 <p>Best regards,<br>The {{site.name}} Team</p>`;
         break;
       case 'invitation':
-        templateSubject.value = 'You\'ve Been Invited to Join jBoilerplate';
+        templateSubject.value = 'You\'ve Been Invited to Join EYES of Soteria';
         templateContent.value = `<h1>You've Been Invited!</h1>
 <p>Hello,</p>
-<p>You've been invited to join jBoilerplate. Click the button below to accept the invitation and create your account:</p>
+<p>You've been invited to join EYES of Soteria. Click the button below to accept the invitation and create your account:</p>
 <p><a href="{{invitationLink}}" style="background-color: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Accept Invitation</a></p>
 <p>Best regards,<br>The {{site.name}} Team</p>`;
         break;
       case 'notification':
-        templateSubject.value = 'Notification from jBoilerplate';
+        templateSubject.value = 'Notification from EYES of Soteria';
         templateContent.value = `<h1>Notification</h1>
 <p>Hello {{user.name}},</p>
-<p>This is a notification from jBoilerplate.</p>
+<p>This is a notification from EYES of Soteria.</p>
 <p>Best regards,<br>The {{site.name}} Team</p>`;
         break;
     }

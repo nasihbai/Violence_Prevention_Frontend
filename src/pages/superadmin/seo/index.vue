@@ -38,7 +38,7 @@ const isLoading = ref(false);
 
 // SEO configuration
 const seoConfig = ref({
-  metaTitle: 'jBoilerplate - Modern Vue Framework',
+  metaTitle: 'EYES of Soteria - Modern Vue Framework',
   metaDescription: 'A modern, powerful Vue framework for building web applications',
   ogImage: '/images/og-image.jpg',
   robotsTxt: 'User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /superadmin/\nSitemap: https://example.com/sitemap.xml',
@@ -53,7 +53,7 @@ const seoConfig = ref({
 // Custom meta tags
 const customMetaTags = ref<MetaTag[]>([
   { id: 1, name: 'twitter:card', content: 'summary_large_image' },
-  { id: 2, name: 'twitter:site', content: '@jboilerplate' },
+  { id: 2, name: 'twitter:site', content: '@eyes-of-soteria' },
   { id: 3, property: 'og:type', content: 'website' },
   { id: 4, property: 'og:url', content: 'https://example.com' }
 ]);

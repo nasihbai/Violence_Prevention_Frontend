@@ -39,9 +39,9 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["favicon.ico", "apple-touch-icon.png", "masked-icon.svg"],
       manifest: {
-        name: "jBoilerplate",
-        short_name: "jBoilerplate",
-        description: "A modern Vue 3 application boilerplate",
+        name: "EYES of Soteria",
+        short_name: "Soteria",
+        description: "AI-powered violence detection and safety monitoring system",
         theme_color: "#ffffff",
         start_url: "/",
         display: "standalone",
