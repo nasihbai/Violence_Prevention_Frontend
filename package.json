@@ -32,7 +32,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "dev:all": "concurrently -n DB,BE,FE -c cyan,yellow,green --kill-others-on-fail \"docker compose -f ../FYP_Violence_Prevention_backend/docker-compose.yml up db adminer pgadmin -d\" \"../FYP_Violence_Prevention_backend/venv/Scripts/python.exe ../FYP_Violence_Prevention_backend/run_detection.py --web\" \"vite\"",
+    "dev:all": "concurrently -n DB,BE,FE -c cyan,yellow,green \"docker compose -f ../FYP_Violence_Prevention_backend/docker-compose.yml up db adminer pgadmin -d\" \"node scripts/run-backend.cjs\" \"vite\"",
     "build": "vue-tsc --noEmit && vite build",
     "build:only": "vite build",
     "preview": "vite preview",
