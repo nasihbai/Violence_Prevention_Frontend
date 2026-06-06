@@ -32,6 +32,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:all": "concurrently -n DB,BE,FE -c cyan,yellow,green --kill-others-on-fail \"docker compose -f ../FYP_Violence_Prevention_backend/docker-compose.yml up db adminer pgadmin -d\" \"../FYP_Violence_Prevention_backend/venv/Scripts/python.exe ../FYP_Violence_Prevention_backend/run_detection.py --web\" \"vite\"",
     "build": "vue-tsc --noEmit && vite build",
     "build:only": "vite build",
     "preview": "vite preview",
@@ -41,8 +42,8 @@
     "prepare": "echo 'Skipping prepare script in production build'",
     "setup": "pnpm install && pnpm run build",
     "cli:setup": "cd cli && pnpm run build && pnpm run start setup",
-    "docker:app-only": "docker-compose -f docker-compose.app-only.yml up -d",
-    "docker:up": "docker-compose up -d"
+    "docker:db": "docker compose -f ../FYP_Violence_Prevention_backend/docker-compose.yml up db adminer pgadmin -d",
+    "docker:down": "docker compose -f ../FYP_Violence_Prevention_backend/docker-compose.yml down"
   },
   "dependencies": {
     "@heroicons/vue": "^2.2.0",
@@ -95,6 +96,7 @@
     "chalk": "^5.2.0",
     "cli-cursor": "^4.0.0",
     "commander": "^10.0.1",
+    "concurrently": "^10.0.3",
     "eslint": "^8.57.0 ",
     "eslint-plugin-vue": "^9.14.1",
     "execa": "^7.1.1",
