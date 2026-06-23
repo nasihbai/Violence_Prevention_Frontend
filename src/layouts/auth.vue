@@ -72,14 +72,14 @@ function navigateTo(path: string) {
       >
         <div class="absolute inset-0 bg-zinc-900">
           <img
-            src="https://images.unsplash.com/photo-1594122230689-45899d9e6f69?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            src="@/assets/login.jpg"
             alt="Authentication"
             class="h-full w-full object-cover opacity-30"
           />
         </div>
         <div class="relative z-20 flex items-center text-lg font-medium">
           <img
-            src="@/assets/logo/logo400.jpg"
+            src="@/assets/logo.png"
             alt="logo"
             class="h-16 w-auto rounded-lg"
           />
@@ -124,9 +124,6 @@ function navigateTo(path: string) {
               >
                 Terms
               </button>
-            </div>
-            <div class="mt-2 text-xs">
-              Made with ❤️ by Infyra Ventures
             </div>
           </div>
         </div>

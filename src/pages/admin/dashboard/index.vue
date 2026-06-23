@@ -1,489 +1,271 @@
+<script setup lang="ts">
+import { onMounted, computed } from "vue";
+import { storeToRefs } from "pinia";
+import { useStreamsStore } from "@/stores/streams";
+import { useAlertsStore } from "@/stores/alerts";
+import { useStatsStore } from "@/stores/stats";
+import { useSocket } from "@/composables/useSocket";
+import { getApiUrl } from "@/services/api";
+import CameraTile from "@/components/CameraTile.vue";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Bell, Video } from "lucide-vue-next";
+import type { Alert, Severity } from "@/types/alerts";
+
+const streamsStore = useStreamsStore();
+const alertsStore = useAlertsStore();
+const statsStore = useStatsStore();
+const { streams, activeStreams } = storeToRefs(streamsStore);
+const { alerts } = storeToRefs(alertsStore);
+const { stats } = storeToRefs(statsStore);
+
+// Initializing the socket singleton activates the violence_alert + stats_update
+// listeners so the grid + alert panel stay live once a backend is present.
+useSocket();
+
+onMounted(() => {
+  // All three fail gracefully (empty arrays) when no backend is reachable,
+  // which is what triggers the demo fallback below.
+  streamsStore.fetchStreams();
+  alertsStore.fetchAlerts();
+  statsStore.fetchStats();
+});
+
+// ---------- Demo fallback data (offline preview, no backend) ----------
+interface CameraView {
+  key: string;
+  name: string;
+  location: string;
+  streamId: string;
+  feedUrl: string;
+  online: boolean;
+}
+
+const DEMO_CAMERAS: CameraView[] = [
+  { key: "d1", name: "Front Door", location: "Main Entrance", streamId: "CAM_01", feedUrl: "", online: true },
+  { key: "d2", name: "Lobby", location: "Ground Floor", streamId: "CAM_02", feedUrl: "", online: true },
+  { key: "d3", name: "Garage", location: "Basement B1", streamId: "CAM_03", feedUrl: "", online: true },
+  { key: "d4", name: "Warehouse", location: "Block C", streamId: "CAM_04", feedUrl: "", online: true },
+  { key: "d5", name: "Parking", location: "Outdoor Lot", streamId: "CAM_05", feedUrl: "", online: false },
+  { key: "d6", name: "Reception", location: "Level 2", streamId: "CAM_06", feedUrl: "", online: true },
+];
+
+function demoAlert(id: number, type: Alert["type"], severity: Severity, camera_id: string, minutesAgo: number): Alert {
+  return {
+    id,
+    incident_id: id,
+    type,
+    confidence: 0.9,
+    timestamp: new Date(Date.now() - minutesAgo * 60_000).toISOString(),
+    acknowledged: false,
+    acknowledged_by: null,
+    acknowledged_at: null,
+    dismissed: false,
+    severity,
+    camera_id,
+  };
+}
+
+const DEMO_ALERTS: Alert[] = [
+  demoAlert(9001, "violent", "critical", "CAM_04", 1),
+  demoAlert(9002, "threatening", "high", "CAM_01", 4),
+  demoAlert(9003, "violent", "high", "CAM_04", 7),
+  demoAlert(9004, "threatening", "medium", "CAM_02", 15),
+  demoAlert(9005, "threatening", "low", "CAM_06", 32),
+];
+
+// ---------- Derived view data ----------
+// Use real streams when the backend has returned any; otherwise fall back to
+// demo cameras so the grid is never empty during offline preview.
+const usingDemo = computed(() => streams.value.length === 0);
+
+const cameras = computed<CameraView[]>(() => {
+  if (usingDemo.value) return DEMO_CAMERAS;
+  return activeStreams.value.map((s) => ({
+    key: String(s.id),
+    name: s.name,
+    location: s.location ?? "",
+    streamId: s.stream_id,
+    feedUrl: `${getApiUrl()}/video_feed/${s.stream_id}`,
+    online: true,
+  }));
+});
+
+const panelAlerts = computed<Alert[]>(() =>
+  alerts.value.length > 0 ? alerts.value.slice(0, 12) : DEMO_ALERTS,
+);
+
+// Cameras with a recent alert get the pulsing red border (like the screenshot).
+const alertingCameraIds = computed(() => {
+  const ids = new Set<string>();
+  for (const a of panelAlerts.value.slice(0, 6)) {
+    if (a.camera_id) ids.add(a.camera_id);
+  }
+  return ids;
+});
+
+const severityColor: Record<Severity, string> = {
+  low: "bg-slate-200 text-slate-900 hover:bg-slate-200",
+  medium: "bg-amber-200 text-amber-900 hover:bg-amber-200",
+  high: "bg-orange-300 text-orange-950 hover:bg-orange-300",
+  critical: "bg-red-400 text-red-950 hover:bg-red-400",
+};
+
+function formatTime(iso: string): string {
+  try {
+    return new Date(iso).toLocaleTimeString();
+  } catch {
+    return iso;
+  }
+}
+
+function formatDateTime(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString([], {
+      month: "2-digit",
+      day: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
+}
+
+// Map a camera_id (stream code) back to its human name for the alert title.
+const cameraNameById = computed(() => {
+  const m = new Map<string, string>();
+  for (const c of cameras.value) m.set(c.streamId, c.name);
+  return m;
+});
+
+function cameraName(id: string | null): string {
+  if (!id) return "Unknown camera";
+  return cameraNameById.value.get(id) ?? `Camera ${id}`;
+}
+
+const typeLabel: Record<Alert["type"], string> = {
+  violent: "Violence Detected",
+  threatening: "Threatening Behavior",
+};
+</script>
+
 <template>
-  <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <h1 class="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-      <Button :variant="isEditMode ? 'default' : 'outline'" @click="toggleEditMode">
-        <PencilIcon v-if="!isEditMode" class="mr-2 h-4 w-4" />
-        <GridIcon v-else class="mr-2 h-4 w-4" />
-        {{ isEditMode ? 'Save Layout' : 'Customize Dashboard' }}
-      </Button>
+  <div class="space-y-4">
+    <!-- Header -->
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight">Surveillance Dashboard</h1>
+        <p class="text-sm text-muted-foreground mt-1">
+          Live camera feeds and real-time violence detection alerts.
+        </p>
+      </div>
+      <div class="flex items-center gap-2">
+        <Badge v-if="usingDemo" variant="outline" class="gap-1">Demo data</Badge>
+        <Badge variant="secondary" class="gap-1">
+          {{ cameras.length }} cameras
+        </Badge>
+        <Badge :variant="stats.is_running ? 'default' : 'secondary'" class="gap-1">
+          <span
+            class="inline-block w-2 h-2 rounded-full"
+            :class="stats.is_running ? 'bg-green-500' : 'bg-zinc-400'"
+          />
+          {{ stats.is_running ? "Detector running" : "Detector stopped" }}
+        </Badge>
+      </div>
     </div>
 
-    <!-- Dashboard editor controls (only visible in edit mode) -->
-    <Card v-if="isEditMode" class="bg-muted/50">
-      <CardHeader>
-        <CardTitle>Dashboard Editor</CardTitle>
-        <CardDescription>Drag and drop widgets to customize your dashboard</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div class="space-y-4">
-          <div>
-            <h3 class="text-sm font-medium mb-2">Available Widgets</h3>
-            <div class="flex flex-wrap gap-2">
+    <div class="grid grid-cols-1 xl:grid-cols-4 gap-4">
+      <!-- Camera grid -->
+      <div class="xl:col-span-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-3">
+          <CameraTile
+            v-for="cam in cameras"
+            :key="cam.key"
+            :name="cam.name"
+            :location="cam.location"
+            :stream-id="cam.streamId"
+            :feed-url="cam.feedUrl"
+            :online="cam.online"
+            :recent-alert="alertingCameraIds.has(cam.streamId)"
+          />
+        </div>
+      </div>
+
+      <!-- Alert panel -->
+      <Card class="xl:col-span-1 self-start">
+        <CardHeader class="pb-3">
+          <CardTitle class="flex items-center gap-2 text-base">
+            <Bell class="h-4 w-4" />
+            Alert Panel
+          </CardTitle>
+          <CardDescription>Most recent detections — updates in real time.</CardDescription>
+        </CardHeader>
+        <CardContent class="p-0">
+          <div
+            v-if="panelAlerts.length === 0"
+            class="py-10 text-center text-sm text-muted-foreground"
+          >
+            No alerts.
+          </div>
+          <div v-else class="max-h-[78vh] overflow-y-auto divide-y">
+            <div
+              v-for="alert in panelAlerts"
+              :key="alert.id"
+              class="px-4 py-3 flex flex-col gap-2 hover:bg-muted/50 transition-colors"
+            >
+              <!-- Title: camera name + status dot -->
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-sm font-semibold text-primary truncate">
+                  {{ cameraName(alert.camera_id) }}
+                </span>
+                <span class="inline-block w-2 h-2 rounded-full bg-primary shrink-0" />
+              </div>
+
+              <!-- Date + time -->
+              <div class="text-xs text-muted-foreground tabular-nums">
+                {{ formatDateTime(alert.timestamp) }}
+              </div>
+
+              <!-- Camera-feed thumbnail with overlays -->
               <div
-                v-for="widget in availableWidgetsToAdd"
-                :key="widget.id"
-                draggable="true"
-                @dragstart="startDrag(widget.id)"
-                @dragend="endDrag"
-                class="flex items-center gap-2 px-3 py-2 rounded-md border bg-card cursor-move hover:bg-accent transition-colors"
+                class="relative aspect-video rounded-md overflow-hidden border"
+                :class="alert.severity === 'critical' ? 'border-red-500' : 'border-zinc-800'"
               >
-                <component :is="widget.icon" class="h-4 w-4 text-muted-foreground" />
-                <span class="text-sm">{{ widget.name }}</span>
+                <div
+                  class="absolute inset-0 flex items-center justify-center text-zinc-500"
+                  :style="{
+                    background:
+                      'radial-gradient(circle at 30% 20%, rgba(255,255,255,0.05) 0%, transparent 50%), linear-gradient(135deg, #18181b 0%, #27272a 100%)',
+                  }"
+                >
+                  <Video class="w-8 h-8" />
+                </div>
+                <!-- Recording indicator -->
+                <span
+                  class="absolute bottom-2 left-2 w-3 h-3 rounded-full bg-red-500 ring-2 ring-red-500/40 animate-pulse"
+                />
+                <!-- Time badge -->
+                <span
+                  class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/70 text-white text-[10px] font-mono tabular-nums"
+                >
+                  {{ formatTime(alert.timestamp) }}
+                </span>
+              </div>
+
+              <!-- Footer: severity + detection label -->
+              <div class="flex items-center gap-2">
+                <Badge v-if="alert.severity" :class="severityColor[alert.severity]">
+                  {{ alert.severity }}
+                </Badge>
+                <span class="text-sm text-muted-foreground">{{ typeLabel[alert.type] }}</span>
               </div>
             </div>
           </div>
-          
-          <div class="text-sm text-muted-foreground">
-            <p>• Drag widgets to reorder them</p>
-            <p>• Click the size button to change widget size</p>
-            <p>• Click the X button to remove widgets</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-
-    <!-- Dashboard Grid -->
-    <div 
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-      :class="{ 'border-2 border-dashed border-muted-foreground/20 p-4 rounded-lg': isEditMode }"
-    >
-      <!-- Dashboard widgets -->
-      <template v-for="(widget, index) in dashboardLayout" :key="`${widget.id}-${index}`">
-        <div
-          :class="[
-            getWidgetClass(widget.size),
-            { 
-              'cursor-move border-2 border-dashed hover:border-primary/50 relative': isEditMode,
-              'opacity-50': isDragging && draggedWidget === widget.id,
-              'border-primary': hoveredWidgetArea === index && isDragging
-            }
-          ]"
-          draggable="true"
-          @dragstart="startDrag(widget.id)"
-          @dragover="dragOver($event, index)"
-          @drop="drop($event, index)"
-          @dragend="endDrag"
-        >
-          <!-- Widget controls (only visible in edit mode) -->
-          <div v-if="isEditMode" class="absolute right-2 top-2 z-10 flex gap-1">
-            <Button variant="ghost" size="icon" class="h-6 w-6" @click="toggleWidgetSize(index)">
-              <MaximizeIcon v-if="widget.size === 'small'" class="h-3 w-3" />
-              <MinimizeIcon v-else class="h-3 w-3" />
-            </Button>
-            <Button variant="ghost" size="icon" class="h-6 w-6 text-destructive" @click="removeWidget(index)">
-              <XIcon class="h-3 w-3" />
-            </Button>
-          </div>
-          
-          <!-- User Stats Widget -->
-          <Card v-if="widget.id === 'users'">
-            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle class="text-sm font-medium">Total Users</CardTitle>
-              <Users class="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div class="text-2xl font-bold">{{ stats.totalUsers }}</div>
-              <p class="text-xs text-muted-foreground">
-                <span class="text-green-500 flex items-center">
-                  <ArrowUp class="mr-1 h-3 w-3" />
-                  {{ stats.userGrowth }}%
-                </span>
-                from last month
-              </p>
-            </CardContent>
-          </Card>
-
-          <!-- Active Users Widget -->
-          <Card v-else-if="widget.id === 'activeUsers'">
-            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle class="text-sm font-medium">Active Users</CardTitle>
-              <Activity class="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div class="text-2xl font-bold">{{ stats.activeUsers }}</div>
-              <p class="text-xs text-muted-foreground">
-                <span class="text-muted-foreground">
-                  {{ Math.round((stats.activeUsers / stats.totalUsers) * 100) }}% of total users
-                </span>
-              </p>
-            </CardContent>
-          </Card>
-
-          <!-- Revenue Widget -->
-          <Card v-else-if="widget.id === 'revenue'">
-            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle class="text-sm font-medium">Revenue</CardTitle>
-              <BarChart class="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div class="text-2xl font-bold">{{ stats.revenue }}</div>
-              <p class="text-xs text-muted-foreground">
-                <span class="text-green-500 flex items-center">
-                  <ArrowUp class="mr-1 h-3 w-3" />
-                  {{ stats.revenueGrowth }}%
-                </span>
-                from last month
-              </p>
-            </CardContent>
-          </Card>
-
-          <!-- System Status Widget -->
-          <Card v-else-if="widget.id === 'systemStatus'">
-            <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle class="text-sm font-medium">System Status</CardTitle>
-              <Server class="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div class="text-2xl font-bold">{{ stats.uptime }}</div>
-              <p class="text-xs text-muted-foreground">
-                <span class="text-green-500">All systems operational</span>
-              </p>
-            </CardContent>
-          </Card>
-
-          <!-- User Activity Chart Widget -->
-          <Card v-else-if="widget.id === 'userActivity'" className="col-span-2">
-            <CardHeader>
-              <CardTitle>Weekly User Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div class="h-[200px] w-full">
-                <BarChartComponent
-                  :data="userActivity.map(item => item.count)"
-                  :categories="userActivity.map(item => item.day)"
-                  :colors="['hsl(var(--primary))']"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <!-- Server Resources Widget -->
-          <Card v-else-if="widget.id === 'serverResources'">
-            <CardHeader>
-              <CardTitle>Server Resources</CardTitle>
-              <CardDescription>
-                Current resource utilization
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div class="space-y-4">
-                <div class="space-y-2">
-                  <div class="flex items-center justify-between text-sm">
-                    <span>CPU Usage</span>
-                    <span class="font-medium">{{ stats.cpuUsage }}%</span>
-                  </div>
-                  <div class="h-2 w-full rounded-full bg-secondary">
-                    <div class="h-full rounded-full bg-primary" :style="{ width: `${stats.cpuUsage}%` }"></div>
-                  </div>
-                </div>
-                
-                <div class="space-y-2">
-                  <div class="flex items-center justify-between text-sm">
-                    <span>Memory Usage</span>
-                    <span class="font-medium">{{ stats.memoryUsage }}%</span>
-                  </div>
-                  <div class="h-2 w-full rounded-full bg-secondary">
-                    <div class="h-full rounded-full bg-primary" :style="{ width: `${stats.memoryUsage}%` }"></div>
-                  </div>
-                </div>
-                
-                <div class="space-y-2">
-                  <div class="flex items-center justify-between text-sm">
-                    <span>Disk Usage</span>
-                    <span class="font-medium">{{ stats.diskUsage }}%</span>
-                  </div>
-                  <div class="h-2 w-full rounded-full bg-secondary">
-                    <div class="h-full rounded-full bg-primary" :style="{ width: `${stats.diskUsage}%` }"></div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" class="w-full">
-                View Details
-              </Button>
-            </CardFooter>
-          </Card>
-
-          <!-- Recent Activity Widget -->
-          <Card v-else-if="widget.id === 'recentActivity'">
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest system events and user actions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div class="space-y-4">
-                <div class="flex items-start gap-4 rounded-lg border p-3">
-                  <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                    <Users class="h-4 w-4 text-primary" />
-                  </div>
-                  <div class="flex-1 space-y-1">
-                    <p class="text-sm font-medium">New user registered</p>
-                    <p class="text-xs text-muted-foreground">John Smith created an account</p>
-                    <p class="text-xs text-muted-foreground">2 hours ago</p>
-                  </div>
-                </div>
-                
-                <div class="flex items-start gap-4 rounded-lg border p-3">
-                  <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                    <BarChart class="h-4 w-4 text-primary" />
-                  </div>
-                  <div class="flex-1 space-y-1">
-                    <p class="text-sm font-medium">Monthly report generated</p>
-                    <p class="text-xs text-muted-foreground">System generated the monthly activity report</p>
-                    <p class="text-xs text-muted-foreground">4 hours ago</p>
-                  </div>
-                </div>
-                
-                <div class="flex items-start gap-4 rounded-lg border p-3">
-                  <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                    <Server class="h-4 w-4 text-primary" />
-                  </div>
-                  <div class="flex-1 space-y-1">
-                    <p class="text-sm font-medium">System update completed</p>
-                    <p class="text-xs text-muted-foreground">All servers updated to the latest version</p>
-                    <p class="text-xs text-muted-foreground">Yesterday</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" class="w-full">View All Activity</Button>
-            </CardFooter>
-          </Card>
-
-          <!-- User Distribution Widget -->
-          <Card v-else-if="widget.id === 'userDistribution'">
-            <CardHeader>
-              <CardTitle>User Distribution</CardTitle>
-              <CardDescription>Users by role type</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div class="h-[200px] w-full">
-                <DonutChart 
-                  :data="userDistribution.data.map(item => item.value)"
-                  :categories="userDistribution.data.map(item => item.name)"
-                  :colors="userDistribution.colors"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <!-- Traffic Sources Widget -->
-          <Card v-else-if="widget.id === 'trafficSources'">
-            <CardHeader>
-              <CardTitle>Traffic Sources</CardTitle>
-              <CardDescription>Where your users come from</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div class="h-[200px] w-full">
-                <DonutChart 
-                  :data="trafficSources.data.map(item => item.value)"
-                  :categories="trafficSources.data.map(item => item.name)"
-                  :colors="trafficSources.colors"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </template>
-
-      <!-- Add widget button (only visible in edit mode) -->
-      <div 
-        v-if="isEditMode && availableWidgetsToAdd.length > 0" 
-        class="col-span-1 border-2 border-dashed rounded-lg flex items-center justify-center p-6 cursor-pointer hover:border-primary/50 transition-colors"
-        @dragover.prevent
-        @drop="drop($event, dashboardLayout.length)"
-      >
-        <div class="flex flex-col items-center gap-2">
-          <Button variant="outline" size="icon" @click="isAddWidgetMenuOpen = true">
-            <Plus class="h-6 w-6" />
-          </Button>
-          <span class="text-sm text-muted-foreground">Drag a widget here or click to add</span>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, computed } from 'vue';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { 
-  Users, Server, Activity, ArrowUp, BarChart, LayoutDashboard, 
-  PencilIcon, XIcon, Plus, GridIcon, MaximizeIcon, MinimizeIcon
-} from "lucide-vue-next";
-import { BarChart as BarChartComponent } from "@/components/ui/chart-bar";
-import { LineChart } from "@/components/ui/chart-line";
-import { DonutChart } from "@/components/ui/chart-donut";
-import { defaultColors } from "@/components/ui/chart";
-
-// Dashboard state
-const isEditMode = ref(false);
-const isDragging = ref(false);
-const draggedWidget = ref<null | string>(null);
-const hoveredWidgetArea = ref<null | number>(null);
-
-// Dashboard layout configuration
-const dashboardLayout = ref([
-  { id: 'users', size: 'small' },
-  { id: 'activeUsers', size: 'small' },
-  { id: 'revenue', size: 'small' },
-  { id: 'systemStatus', size: 'small' },
-  { id: 'userActivity', size: 'large' },
-  { id: 'serverResources', size: 'medium' },
-  { id: 'recentActivity', size: 'large' },
-]);
-
-// Available widgets for adding to dashboard
-const availableWidgets = ref([
-  { id: 'users', name: 'Total Users', icon: Users, size: 'small' },
-  { id: 'activeUsers', name: 'Active Users', icon: Activity, size: 'small' },
-  { id: 'revenue', name: 'Revenue', icon: BarChart, size: 'small' },
-  { id: 'systemStatus', name: 'System Status', icon: Server, size: 'small' },
-  { id: 'userActivity', name: 'User Activity Chart', icon: BarChart, size: 'large' },
-  { id: 'serverResources', name: 'Server Resources', icon: Server, size: 'medium' },
-  { id: 'recentActivity', name: 'Recent Activity', icon: Activity, size: 'large' },
-  { id: 'userDistribution', name: 'User Distribution', icon: Users, size: 'medium' },
-  { id: 'trafficSources', name: 'Traffic Sources', icon: BarChart, size: 'medium' },
-]);
-
-// Mock data for the dashboard
-const stats = ref({
-  totalUsers: 486,
-  activeUsers: 382,
-  newUsers: 24,
-  servers: 8,
-  cpuUsage: 38,
-  memoryUsage: 62,
-  diskUsage: 47,
-  uptime: "99.98%",
-  userGrowth: 12,
-  revenue: "$12,845",
-  revenueGrowth: 8,
-});
-
-// Mock data for user activity chart
-const userActivity = ref([
-  { day: 'Mon', count: 45 },
-  { day: 'Tue', count: 52 },
-  { day: 'Wed', count: 49 },
-  { day: 'Thu', count: 63 },
-  { day: 'Fri', count: 55 },
-  { day: 'Sat', count: 38 },
-  { day: 'Sun', count: 42 },
-]);
-
-// User distribution data for donut chart
-const userDistribution = ref({
-  data: [
-    { name: 'Admins', value: 15 },
-    { name: 'Managers', value: 35 },
-    { name: 'Regular Users', value: 436 },
-  ],
-  colors: defaultColors(3),
-});
-
-// Traffic sources data
-const trafficSources = ref({
-  data: [
-    { name: 'Direct', value: 35 },
-    { name: 'Search', value: 42 },
-    { name: 'Social', value: 18 },
-    { name: 'Referral', value: 5 },
-  ],
-  colors: defaultColors(4),
-});
-
-// Methods for drag and drop functionality
-function startDrag(widgetId: string) {
-  if (!isEditMode.value) return;
-  isDragging.value = true;
-  draggedWidget.value = widgetId;
-}
-
-function endDrag() {
-  isDragging.value = false;
-  draggedWidget.value = null;
-  hoveredWidgetArea.value = null;
-}
-
-function dragOver(event: DragEvent, index: number) {
-  if (!isEditMode.value || !isDragging.value) return;
-  event.preventDefault();
-  hoveredWidgetArea.value = index;
-}
-
-function drop(event: DragEvent, index: number) {
-  if (!isEditMode.value || !draggedWidget.value) return;
-  event.preventDefault();
-  
-  // Find current index of dragged widget
-  const currentIndex = dashboardLayout.value.findIndex(widget => widget.id === draggedWidget.value);
-  
-  if (currentIndex !== -1) {
-    // Move widget from current position to new position
-    const [removed] = dashboardLayout.value.splice(currentIndex, 1);
-    dashboardLayout.value.splice(index, 0, removed);
-  } else {
-    // Add new widget to dashboard
-    const widgetToAdd = availableWidgets.value.find(widget => widget.id === draggedWidget.value);
-    if (widgetToAdd) {
-      dashboardLayout.value.splice(index, 0, { id: widgetToAdd.id, size: widgetToAdd.size });
-    }
-  }
-  
-  endDrag();
-}
-
-function addWidget(widgetId: string) {
-  const widgetToAdd = availableWidgets.value.find(widget => widget.id === widgetId);
-  if (widgetToAdd) {
-    dashboardLayout.value.push({ id: widgetToAdd.id, size: widgetToAdd.size });
-  }
-}
-
-function removeWidget(index: number) {
-  if (!isEditMode.value) return;
-  dashboardLayout.value.splice(index, 1);
-}
-
-function toggleWidgetSize(index: number) {
-  if (!isEditMode.value) return;
-  const widget = dashboardLayout.value[index];
-  const sizes = ['small', 'medium', 'large'];
-  const currentSizeIndex = sizes.indexOf(widget.size);
-  const nextSizeIndex = (currentSizeIndex + 1) % sizes.length;
-  widget.size = sizes[nextSizeIndex];
-}
-
-function toggleEditMode() {
-  isEditMode.value = !isEditMode.value;
-  if (!isEditMode.value) {
-    // Save dashboard layout to user preferences (in a real app)
-    console.log('Dashboard layout saved:', dashboardLayout.value);
-  }
-}
-
-// Get widget class based on size
-function getWidgetClass(size: string) {
-  switch (size) {
-    case 'small':
-      return 'col-span-1';
-    case 'medium':
-      return 'col-span-2';
-    case 'large':
-      return 'col-span-3';
-    default:
-      return 'col-span-1';
-  }
-}
-
-// Get available widgets that are not already on the dashboard
-const availableWidgetsToAdd = computed(() => {
-  const dashboardWidgetIds = dashboardLayout.value.map(widget => widget.id);
-  return availableWidgets.value.filter(widget => !dashboardWidgetIds.includes(widget.id));
-});
-</script> 

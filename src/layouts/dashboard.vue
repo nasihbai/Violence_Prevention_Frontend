@@ -134,7 +134,7 @@ onUnmounted(() => {
       <SidebarHeader>
         <div class="flex items-center justify-center gap-2 mt-4">
           <img
-            src="@/assets/logo/logo400.jpg"
+            src="@/assets/logo.png"
             alt="logo"
             class="h-20 w-auto fill-blue-500 rounded-lg"
           />

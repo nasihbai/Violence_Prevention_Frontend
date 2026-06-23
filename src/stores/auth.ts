@@ -18,6 +18,32 @@ const getApiUrl = (): string => {
 };
 
 /**
+ * Dev-only offline auth mock. Enabled by setting VITE_MOCK_AUTH=true in
+ * .env.local (gitignored). When on, login() and fetchUserData() short-circuit
+ * with a fake session instead of calling the Python backend — lets you preview
+ * authenticated pages (e.g. the dashboard navbar) without running the backend.
+ * Leave it unset/false for any real build.
+ */
+const MOCK_AUTH = import.meta.env.VITE_MOCK_AUTH === "true";
+
+/** Build a fake user for the offline mock, deriving the role from the email. */
+const buildMockUser = (email: string): User => {
+  const local = email.split("@")[0]?.toLowerCase() ?? "";
+  const user_type: UserRole = local.includes("superadmin")
+    ? "superadmin"
+    : local.includes("admin")
+      ? "admin"
+      : "user";
+  return {
+    id: "mock-1",
+    email,
+    fullname: `Mock ${user_type}`,
+    user_type,
+    avatar: "/avatars/shadcn.jpg",
+  };
+};
+
+/**
  * Authentication store that manages user authentication state
  * Uses HTTP-only cookies for refresh tokens and localStorage for access tokens
  * Implements CSRF protection and a role-based access system
@@ -154,6 +180,12 @@ export const useAuthStore = defineStore("auth", () => {
    * Fetch the current user's data from the server
    */
   const fetchUserData = async (): Promise<void> => {
+    // Offline dev mock: trust the user already restored from localStorage,
+    // so a page reload doesn't try to validate against an absent backend.
+    if (MOCK_AUTH) {
+      return;
+    }
+
     try {
       const { data } = await apiPost<User>("/auth/me", {});
       user.value = data;
@@ -187,6 +219,17 @@ export const useAuthStore = defineStore("auth", () => {
   async function login(credentials: LoginCredentials): Promise<void> {
     isLoading.value = true;
     error.value = null;
+
+    // Offline dev mock: accept any credentials, set a fake session.
+    if (MOCK_AUTH) {
+      const mockUser = buildMockUser(credentials.email);
+      accessToken.value = "mock-token";
+      user.value = mockUser;
+      localStorage.setItem("access_token", "mock-token");
+      localStorage.setItem("user", JSON.stringify(mockUser));
+      isLoading.value = false;
+      return;
+    }
 
     try {
       const response = await ofetch<{ access_token: string; user: User }>(
