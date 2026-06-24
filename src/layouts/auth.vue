@@ -104,22 +104,22 @@ function navigateTo(path: string) {
           <!-- Footer with links -->
           <div class="mt-8 text-center text-sm text-muted-foreground">
             <div class="flex justify-center space-x-4">
-              <button 
-                @click="navigateTo('/about')" 
+              <button
+                @click="navigateTo('/about')"
                 class="hover:text-primary transition-colors"
               >
                 About Us
               </button>
               <span class="text-muted-foreground/50">|</span>
-              <button 
-                @click="navigateTo('/privacy-policy')" 
+              <button
+                @click="navigateTo('/privacy-policy')"
                 class="hover:text-primary transition-colors"
               >
                 Privacy
               </button>
               <span class="text-muted-foreground/50">|</span>
-              <button 
-                @click="navigateTo('/terms-of-service')" 
+              <button
+                @click="navigateTo('/terms-of-service')"
                 class="hover:text-primary transition-colors"
               >
                 Terms

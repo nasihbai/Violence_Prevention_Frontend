@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-// Placeholder logo — replace src/assets/img/logo/logo.png with the real
-// logo (keep the filename) and it shows up here automatically.
-import logoUrl from '@/assets/img/logo/logo.png';
+import { useDark } from '@vueuse/core';
+import { useConfigStore } from '@/stores/config';
+import logoUrl from '@/assets/logo.png';
 
 interface Props {
   message?: string;
@@ -14,7 +14,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   message: 'Memuatkan...',
   progress: 0,
-  title: 'EYES of Soteria',
+  title: 'SOTERIA',
   subtitle: 'Violence Detection & Monitoring',
 });
 
@@ -35,6 +35,33 @@ const strokeDashoffset = computed(
 
 const spinnerDash = circumference * 0.25;
 const spinnerGap = circumference * 0.75;
+
+// Theme
+const isDark = useDark();
+const configStore = useConfigStore();
+const primaryColor   = computed(() => configStore.getTheme.primaryColor   || '#0ea5e9');
+const accentColor    = computed(() => configStore.getTheme.accentColor     || '#6366f1');
+const fontFamily     = computed(() => configStore.getTheme.fontFamily      || 'DM Sans, sans-serif');
+
+// CSS var bindings
+const bgColor      = computed(() => isDark.value ? '#0f172a' : '#f8fafc');
+const cardBg       = computed(() => isDark.value ? '#1e293b' : '#ffffff');
+const cardShadow   = computed(() =>
+  isDark.value
+    ? '0 1px 3px rgba(0,0,0,0.3), 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05)'
+    : '0 1px 3px rgba(15,23,42,0.06), 0 8px 32px rgba(15,23,42,0.08), 0 0 0 1px rgba(15,23,42,0.04)',
+);
+const blobColor1   = computed(() => isDark.value ? `${primaryColor.value}12` : `${primaryColor.value}20`);
+const blobColor2   = computed(() => isDark.value ? `${accentColor.value}0d`  : `${accentColor.value}14`);
+const titleColor   = computed(() => isDark.value ? '#f1f5f9' : '#0f172a');
+const subtitleColor= computed(() => isDark.value ? '#64748b' : '#94a3b8');
+const statusColor  = computed(() => isDark.value ? '#94a3b8' : '#64748b');
+const trackColor   = computed(() => isDark.value ? '#334155' : '#e2e8f0');
+const pctColor     = computed(() => primaryColor.value);
+const barGradient  = computed(() =>
+  `linear-gradient(90deg, ${primaryColor.value}aa 0%, ${primaryColor.value} 50%, ${accentColor.value} 100%)`
+);
+const refreshBtnColor = computed(() => primaryColor.value);
 </script>
 
 <template>
@@ -52,7 +79,7 @@ const spinnerGap = circumference * 0.75;
             cx="60"
             cy="60"
             :r="RADIUS"
-            :style="{ strokeDasharray: circumference, strokeDashoffset }"
+            :style="{ strokeDasharray: circumference, strokeDashoffset, stroke: primaryColor }"
           />
         </svg>
         <svg class="ring-svg ring-spin-layer" viewBox="0 0 120 120" aria-hidden="true">
@@ -61,15 +88,11 @@ const spinnerGap = circumference * 0.75;
             cx="60"
             cy="60"
             :r="RADIUS"
-            :style="{ strokeDasharray: `${spinnerDash} ${spinnerGap}` }"
+            :style="{ strokeDasharray: `${spinnerDash} ${spinnerGap}`, stroke: primaryColor }"
           />
         </svg>
         <div class="ring-center">
-          <img
-            :src="logoUrl"
-            :alt="title"
-            class="ring-logo"
-          />
+          <img :src="logoUrl" :alt="title" class="ring-logo" />
           <span class="ring-pct">{{ progress }}%</span>
         </div>
       </div>
@@ -88,7 +111,7 @@ const spinnerGap = circumference * 0.75;
             v-for="i in 3"
             :key="i"
             class="dot"
-            :style="{ animationDelay: `${(i - 1) * 0.2}s` }"
+            :style="{ animationDelay: `${(i - 1) * 0.2}s`, background: primaryColor }"
           />
         </div>
       </div>
@@ -120,9 +143,10 @@ const spinnerGap = circumference * 0.75;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f8fafc;
-  font-family: 'DM Sans', sans-serif;
+  background: v-bind(bgColor);
+  font-family: v-bind(fontFamily);
   overflow: hidden;
+  transition: background 0.3s ease;
 }
 
 .blob {
@@ -133,23 +157,20 @@ const spinnerGap = circumference * 0.75;
 }
 .blob-1 {
   width: 500px; height: 500px;
-  background: rgba(56, 189, 248, 0.12);
+  background: v-bind(blobColor1);
   top: -120px; right: -100px;
 }
 .blob-2 {
   width: 400px; height: 400px;
-  background: rgba(99, 102, 241, 0.08);
+  background: v-bind(blobColor2);
   bottom: -100px; left: -80px;
 }
 
 .card {
   position: relative;
-  background: #ffffff;
+  background: v-bind(cardBg);
+  box-shadow: v-bind(cardShadow);
   border-radius: 24px;
-  box-shadow:
-    0 1px 3px rgba(15, 23, 42, 0.06),
-    0 8px 32px rgba(15, 23, 42, 0.08),
-    0 0 0 1px rgba(15, 23, 42, 0.04);
   padding: 2.5rem 2.25rem 2rem;
   width: 100%;
   max-width: 340px;
@@ -158,6 +179,7 @@ const spinnerGap = circumference * 0.75;
   align-items: center;
   gap: 1.5rem;
   animation: cardIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* ── Ring ──────────────────────────────────── */
@@ -177,13 +199,13 @@ const spinnerGap = circumference * 0.75;
 
 .ring-track {
   fill: none;
-  stroke: #e2e8f0;
+  stroke: v-bind(trackColor);
   stroke-width: 3;
+  transition: stroke 0.3s ease;
 }
 
 .ring-fill {
   fill: none;
-  stroke: #0ea5e9;
   stroke-width: 3;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.65s cubic-bezier(0.4, 0, 0.2, 1);
@@ -195,7 +217,6 @@ const spinnerGap = circumference * 0.75;
 
 .ring-spinner {
   fill: none;
-  stroke: #0ea5e9;
   stroke-width: 3;
   stroke-linecap: round;
   opacity: 0.35;
@@ -212,7 +233,7 @@ const spinnerGap = circumference * 0.75;
 }
 
 .ring-logo {
-  height: 38px;
+  height: 52px;
   object-fit: contain;
   animation: logoPulse 2.5s ease-in-out infinite;
 }
@@ -220,7 +241,7 @@ const spinnerGap = circumference * 0.75;
 .ring-pct {
   font-size: 10px;
   font-weight: 500;
-  color: #0ea5e9;
+  color: v-bind(pctColor);
   letter-spacing: 0.06em;
   font-feature-settings: 'tnum';
 }
@@ -231,10 +252,11 @@ const spinnerGap = circumference * 0.75;
 .title {
   font-size: 1.375rem;
   font-weight: 600;
-  color: #0f172a;
+  color: v-bind(titleColor);
   letter-spacing: -0.02em;
   margin: 0;
   line-height: 1.2;
+  transition: color 0.3s ease;
 }
 
 .subtitle {
@@ -243,7 +265,8 @@ const spinnerGap = circumference * 0.75;
   font-weight: 400;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: v-bind(subtitleColor);
+  transition: color 0.3s ease;
 }
 
 /* ── Status ────────────────────────────────── */
@@ -257,9 +280,10 @@ const spinnerGap = circumference * 0.75;
 .status-text {
   font-size: 0.8125rem;
   font-weight: 400;
-  color: #64748b;
+  color: v-bind(statusColor);
   margin: 0;
   animation: textIn 0.3s ease;
+  transition: color 0.3s ease;
 }
 
 .dots { display: flex; gap: 6px; }
@@ -268,7 +292,6 @@ const spinnerGap = circumference * 0.75;
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #0ea5e9;
   animation: breathe 1.4s ease-in-out infinite;
 }
 
@@ -278,15 +301,16 @@ const spinnerGap = circumference * 0.75;
 .bar-track {
   width: 100%;
   height: 4px;
-  background: #e2e8f0;
+  background: v-bind(trackColor);
   border-radius: 99px;
   overflow: hidden;
+  transition: background 0.3s ease;
 }
 
 .bar-fill {
   height: 100%;
   border-radius: 99px;
-  background: linear-gradient(90deg, #38bdf8 0%, #0ea5e9 50%, #6366f1 100%);
+  background: v-bind(barGradient);
   background-size: 200% 100%;
   transition: width 0.65s cubic-bezier(0.4, 0, 0.2, 1);
   animation: shimmer 1.8s linear infinite;
@@ -300,21 +324,21 @@ const spinnerGap = circumference * 0.75;
   gap: 0.375rem;
   align-items: center;
 }
-.refresh-wrap p { font-size: 0.75rem; color: #94a3b8; margin: 0; }
+.refresh-wrap p { font-size: 0.75rem; color: v-bind(subtitleColor); margin: 0; }
 .refresh-wrap button {
   font-family: inherit;
   font-size: 0.75rem;
   font-weight: 500;
-  color: #0ea5e9;
+  color: v-bind(refreshBtnColor);
   background: none;
   border: none;
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 3px;
-  transition: color 0.2s;
+  transition: opacity 0.2s;
   padding: 0;
 }
-.refresh-wrap button:hover { color: #0284c7; }
+.refresh-wrap button:hover { opacity: 0.75; }
 
 /* ── Keyframes ─────────────────────────────── */
 @keyframes cardIn {
