@@ -185,6 +185,65 @@
     --sidebar-border: 0 0% 92.1569%;
     --sidebar-ring: 0 0% 70.9804%;
   }
+
+  /*
+   * Planix scheme — dark-first premium palette ported from the Planix
+   * template. Defined on both the base and `.dark` selectors with the same
+   * values so the app reads as Planix regardless of the light/dark class.
+   * Raw surface/accent extras (--panel, --accent-coral, …) live in
+   * planix-theme.css; this block only maps the Shadcn token names.
+   */
+  [data-color-scheme="planix"],
+  [data-color-scheme="planix"].dark {
+    --background: 240 5.9% 3.3%;
+    --foreground: 32 39% 93.5%;
+
+    --card: 220 8.1% 7.3%;
+    --card-foreground: 32 39% 93.5%;
+
+    --popover: 220 8.1% 7.3%;
+    --popover-foreground: 32 39% 93.5%;
+
+    --primary: 10 94.4% 72%;
+    --primary-foreground: 13 48% 10%;
+
+    --secondary: 230 8.8% 13.3%;
+    --secondary-foreground: 32 39% 93.5%;
+
+    --muted: 230 8.8% 13.3%;
+    --muted-foreground: 33 4.7% 62.5%;
+
+    --accent: 10 94.4% 72%;
+    --accent-foreground: 13 48% 10%;
+
+    --destructive: 0 81.4% 66.3%;
+    --destructive-foreground: 13 48% 10%;
+
+    --success: 141 55.6% 61.2%;
+    --success-foreground: 13 48% 10%;
+
+    --warning: 38 92% 60%;
+    --warning-foreground: 13 48% 10%;
+
+    --border: 227 11.4% 15.5%;
+    --input: 227 11.4% 15.5%;
+    --ring: 10 94.4% 72%;
+
+    --chart-1: 10 94.4% 72%;
+    --chart-2: 141 55.6% 61.2%;
+    --chart-3: 33 4.7% 62.5%;
+    --chart-4: 12 100% 75.7%;
+    --chart-5: 0 81.4% 66.3%;
+
+    --sidebar-background: 240 9.1% 2.2%;
+    --sidebar-foreground: 33 4.7% 62.5%;
+    --sidebar-primary: 10 94.4% 72%;
+    --sidebar-primary-foreground: 13 48% 10%;
+    --sidebar-accent: 230 8.8% 13.3%;
+    --sidebar-accent-foreground: 32 39% 93.5%;
+    --sidebar-border: 227 11.4% 15.5%;
+    --sidebar-ring: 10 94.4% 72%;
+  }
 }
 
 @layer base {
@@ -193,7 +252,7 @@
   }
   body {
     @apply bg-background text-foreground font-sans;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Manrope', 'Inter', system-ui, sans-serif;
   }
 
   :root {

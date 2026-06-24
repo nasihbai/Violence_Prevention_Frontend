@@ -5,6 +5,7 @@ module.exports = {
   theme: {
   	fontFamily: {
   		sans: [
+  			'Manrope',
   			'Inter',
   			'system-ui',
   			'sans-serif'
@@ -58,6 +59,14 @@ module.exports = {
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',
+  			// Planix raw surface/accent extras (defined in planix-theme.css,
+  			// not hsl-wrapped). Enable bg-panel, border-panel-strong, etc.
+  			panel: 'var(--panel)',
+  			'panel-strong': 'var(--panel-strong)',
+  			'panel-soft': 'var(--panel-soft)',
+  			'panel-muted': 'var(--panel-muted)',
+  			'accent-coral': 'var(--accent-coral)',
+  			'accent-strong': 'var(--accent-strong)',
   			chart: {
   				'1': 'hsl(var(--chart-1))',
   				'2': 'hsl(var(--chart-2))',

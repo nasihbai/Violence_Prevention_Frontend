@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <link href="https://fonts.cdnfonts.com/css/switzer" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="EYES of Soteria — AI-powered violence detection and safety monitoring system">
     <title>EYES of Soteria</title>
@@ -23,17 +26,22 @@
         }
       });
       
-      // Theme initialization script
+      // Theme initialization script — Planix is dark-first. With no saved
+      // preference we default to dark + the Planix color scheme so the very
+      // first paint matches (no light flash before main.ts runs).
       (function() {
         const getThemePreference = function() {
           if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
             return localStorage.getItem('theme');
           }
-          return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          return 'dark';
         };
-        
+
         const theme = getThemePreference();
         document.documentElement.classList[theme === 'dark' ? 'add' : 'remove']('dark');
+
+        const colorScheme = (typeof localStorage !== 'undefined' && localStorage.getItem('theme-color')) || 'planix';
+        document.documentElement.setAttribute('data-color-scheme', colorScheme);
       })();
     </script>
     <!-- Umami Analytics - Will be configured by plugin -->

@@ -61,7 +61,7 @@ const showKeyboardShortcuts = ref(false);
 // Initialize theme settings on mount
 onMounted(() => {
   // Apply saved color scheme
-  const savedColorScheme = localStorage.getItem('theme-color') || 'zinc';
+  const savedColorScheme = localStorage.getItem('theme-color') || 'planix';
   document.documentElement.setAttribute('data-color-scheme', savedColorScheme);
   
   // Apply saved radius
