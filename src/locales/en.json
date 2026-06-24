@@ -52,7 +52,19 @@
   },
   "notifications": {
     "newMessage": "You have a new message",
-    "newNotification": "You have a new notification"
+    "newNotification": "You have a new notification",
+    "title": "Notifications",
+    "unreadCount": "You have {count} unread notifications",
+    "empty": "No notifications",
+    "emptyHint": "You're all caught up!",
+    "viewAll": "View All",
+    "markAllRead": "Mark All Read"
+  },
+  "dashboard": {
+    "header": {
+      "superAdmin": "SuperAdmin",
+      "sectionFallback": "Dashboard"
+    }
   },
   "errors": {
     "somethingWentWrong": "Something went wrong",

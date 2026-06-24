@@ -52,7 +52,19 @@
   },
   "notifications": {
     "newMessage": "Tienes un nuevo mensaje",
-    "newNotification": "Tienes una nueva notificación"
+    "newNotification": "Tienes una nueva notificación",
+    "title": "Notificaciones",
+    "unreadCount": "Tienes {count} notificaciones sin leer",
+    "empty": "Sin notificaciones",
+    "emptyHint": "¡Estás al día!",
+    "viewAll": "Ver todas",
+    "markAllRead": "Marcar todas como leídas"
+  },
+  "dashboard": {
+    "header": {
+      "superAdmin": "SuperAdmin",
+      "sectionFallback": "Panel"
+    }
   },
   "errors": {
     "somethingWentWrong": "Algo salió mal",
