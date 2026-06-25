@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-8 max-w-4xl mx-auto">
     <header class="mb-6">
-      <h1 class="text-3xl font-bold tracking-tight mb-2">Getting Started with jBoilerplate</h1>
+      <h1 class="type-page-title text-foreground mb-2">Getting Started with jBoilerplate</h1>
       <p class="text-muted-foreground">Everything you need to know to set up and run your application</p>
     </header>
 

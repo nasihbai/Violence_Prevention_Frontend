@@ -1,33 +1,35 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { useAuthStore } from "@/stores/auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Mail, LoaderCircle } from "lucide-vue-next";
 import { toast } from "vue-sonner";
 
 const router = useRouter();
 const authStore = useAuthStore();
+const { t } = useI18n();
 
 const email = ref("");
 const isSubmitting = ref(false);
 
 async function handleSubmit() {
   if (!email.value) {
-    toast.error("Please enter your email address");
+    toast.error(t("auth.forgot.enterEmail"));
     return;
   }
 
   try {
     isSubmitting.value = true;
     // TODO: Implement forgot password logic
-    toast.success("Password reset instructions have been sent to your email");
+    toast.success(t("auth.forgot.resetSent"));
     router.push("/login");
   } catch (error: any) {
     console.log("error: ", error);
-    toast.error(error.data?.message || "Something went wrong. Please try again.");
+    toast.error(error.data?.message || t("errors.somethingWentWrong"));
   } finally {
     isSubmitting.value = false;
   }
@@ -36,63 +38,50 @@ async function handleSubmit() {
 
 <template>
   <div>
-    <div class="flex flex-col space-y-2 text-center">
-      <h1 class="text-2xl font-semibold tracking-tight">
-        Forgot Password
+    <div class="mb-8 flex flex-col space-y-2">
+      <h1 class="type-page-title text-foreground">
+        {{ t("auth.forgot.title") }}
       </h1>
       <p class="text-sm text-muted-foreground">
-        Enter your email address and we'll send you instructions to reset your password
+        {{ t("auth.forgot.subtitle") }}
       </p>
     </div>
 
-    <Card>
-      <CardContent class="pt-4">
-        <form @submit.prevent="handleSubmit" class="space-y-4">
-          <div class="space-y-2">
-            <Label for="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              v-model="email"
-              placeholder="name@example.com"
-              required
-            />
-          </div>
-          <Button type="submit" class="w-full" :disabled="isSubmitting">
-            <span v-if="isSubmitting">
-              <svg
-                class="animate-spin mr-2 h-4 w-4 text-primary-foreground"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Sending...
-            </span>
-            <span v-else>Send Reset Instructions</span>
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+    <form class="space-y-4" @submit.prevent="handleSubmit">
+      <div class="space-y-2">
+        <Label for="email">{{ t("auth.email") }}</Label>
+        <div class="relative">
+          <Mail
+            class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            id="email"
+            v-model="email"
+            type="email"
+            :placeholder="t('auth.forgot.emailPlaceholder')"
+            required
+            autocomplete="email"
+            class="h-12 rounded-xl pl-10"
+          />
+        </div>
+      </div>
 
-    <p class="text-center text-sm text-muted-foreground mt-6">
-      Remember your password?
-      <router-link to="/login" class="text-primary underline underline-offset-4 hover:text-primary/90">
-        Sign in
+      <Button type="submit" class="h-12 w-full" :disabled="isSubmitting">
+        <LoaderCircle v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
+        <span>{{
+          isSubmitting ? t("auth.forgot.sending") : t("auth.forgot.sendInstructions")
+        }}</span>
+      </Button>
+    </form>
+
+    <p class="mt-6 text-center text-sm text-muted-foreground">
+      {{ t("auth.forgot.rememberPassword") }}
+      <router-link
+        to="/login"
+        class="font-medium text-primary underline-offset-4 hover:underline"
+      >
+        {{ t("auth.signIn") }}
       </router-link>
     </p>
   </div>
-</template> 
+</template>

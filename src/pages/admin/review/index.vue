@@ -169,7 +169,7 @@ onMounted(fetchQueue);
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
-        <h1 class="text-2xl font-bold">Review Queue</h1>
+        <h1 class="type-page-title text-foreground">Review Queue</h1>
         <p class="text-muted-foreground text-sm mt-1">
           Classify each detected incident as confirmed violence or a false positive
           to build a labelled dataset for future retraining.

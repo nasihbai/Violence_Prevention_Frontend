@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-foreground">
+        <h1 class="type-page-title text-foreground">
           System Information
         </h1>
         <p class="text-muted-foreground mt-1">
@@ -30,7 +30,7 @@
         </CardHeader>
         <CardContent>
           <div class="flex items-center">
-            <div class="h-4 w-4 rounded-full bg-green-500 mr-2"></div>
+            <div class="h-4 w-4 rounded-full bg-success mr-2"></div>
             <div class="text-xl font-bold">Operational</div>
           </div>
           <p class="text-xs text-muted-foreground mt-2">

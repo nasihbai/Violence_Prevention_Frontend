@@ -40,7 +40,60 @@
     "loginSuccessful": "Inicio de sesión exitoso",
     "logoutSuccessful": "Cierre de sesión exitoso",
     "incorrectCredentials": "Correo electrónico o contraseña incorrectos",
-    "accountCreated": "Cuenta creada con éxito"
+    "accountCreated": "Cuenta creada con éxito",
+    "brandName": "EYES of Soteria",
+    "fillAllFields": "Por favor, complete todos los campos",
+    "login": {
+      "title": "Inicia sesión en tu cuenta",
+      "subtitle": "Ingresa tu correo electrónico y contraseña para iniciar sesión",
+      "emailPlaceholder": "m@ejemplo.com",
+      "passwordPlaceholder": "••••••••",
+      "signingIn": "Iniciando sesión...",
+      "noAccount": "¿No tienes una cuenta?",
+      "quickLogin": "Acceso rápido",
+      "quickLoginHint": "Superadmin: Administrador de plataforma | Admin: Administrador regular | Usuario: Usuario estándar",
+      "roleSuperadmin": "Superadmin",
+      "roleAdmin": "Admin",
+      "roleUser": "Usuario"
+    },
+    "register": {
+      "title": "Crea una cuenta",
+      "subtitle": "Ingresa tus datos para crear tu cuenta",
+      "businessName": "Nombre de la empresa",
+      "businessNamePlaceholder": "Nombre de tu empresa",
+      "emailPlaceholder": "nombre@ejemplo.com",
+      "passwordPlaceholder": "••••••••",
+      "creatingAccount": "Creando cuenta...",
+      "createAccount": "Crear cuenta",
+      "haveAccount": "¿Ya tienes una cuenta?",
+      "orContinueWith": "O continúa con",
+      "passwordsDoNotMatch": "Las contraseñas no coinciden",
+      "registrationSuccess": "¡Registro exitoso! Por favor, revisa tu correo para verificar tu cuenta.",
+      "registrationFailed": "El registro falló. Por favor, inténtalo de nuevo."
+    },
+    "forgot": {
+      "title": "Olvidé mi contraseña",
+      "subtitle": "Ingresa tu correo electrónico y te enviaremos instrucciones para restablecer tu contraseña",
+      "emailPlaceholder": "nombre@ejemplo.com",
+      "sending": "Enviando...",
+      "sendInstructions": "Enviar instrucciones de restablecimiento",
+      "rememberPassword": "¿Recuerdas tu contraseña?",
+      "resetSent": "Se han enviado las instrucciones de restablecimiento a tu correo electrónico",
+      "enterEmail": "Por favor, ingresa tu correo electrónico"
+    },
+    "artwork": {
+      "loginTitle": "Tus espacios protegidos, las 24 horas.",
+      "loginDescription": "La detección de violencia con IA en tiempo real mantiene tu entorno seguro para que tu equipo se concentre en lo importante.",
+      "signupTitle": "Configura el monitoreo de seguridad en minutos.",
+      "signupDescription": "Crea tu espacio de trabajo, conecta tus cámaras y empieza a proteger tus espacios sin complicaciones.",
+      "forgotTitle": "Estás a un paso de volver a la seguridad.",
+      "forgotDescription": "Restablece tu contraseña y vuelve a monitorear lo que más importa."
+    },
+    "footer": {
+      "aboutUs": "Acerca de",
+      "privacy": "Privacidad",
+      "terms": "Términos"
+    }
   },
   "validation": {
     "required": "{field} es obligatorio",

@@ -183,7 +183,7 @@ defineOptions({
 
 <template>
   <div>
-    <h1 class="text-3xl font-bold mb-2">SEO & Meta</h1>
+    <h1 class="type-page-title text-foreground mb-2">SEO & Meta</h1>
     <p class="text-muted-foreground mb-6">
       Configure SEO settings and meta tags for your application
     </p>

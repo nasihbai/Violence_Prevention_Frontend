@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-foreground">
+        <h1 class="type-page-title text-foreground">
           Analytics Dashboard
         </h1>
         <p class="text-muted-foreground mt-1">
@@ -37,7 +37,7 @@
           <BarChart4 class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">145,256</div>
+          <div class="type-metric-md text-foreground">145,256</div>
           <div class="flex items-center pt-1">
             <ArrowUpRight class="h-4 w-4 text-green-500 mr-1" />
             <span class="text-xs text-green-500 font-medium">+12.5%</span>
@@ -51,7 +51,7 @@
           <Users class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">28,732</div>
+          <div class="type-metric-md text-foreground">28,732</div>
           <div class="flex items-center pt-1">
             <ArrowUpRight class="h-4 w-4 text-green-500 mr-1" />
             <span class="text-xs text-green-500 font-medium">+8.3%</span>
@@ -65,7 +65,7 @@
           <Clock class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">4m 23s</div>
+          <div class="type-metric-md text-foreground">4m 23s</div>
           <div class="flex items-center pt-1">
             <ArrowDownRight class="h-4 w-4 text-red-500 mr-1" />
             <span class="text-xs text-red-500 font-medium">-1.2%</span>
@@ -79,7 +79,7 @@
           <ArrowDownUp class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">32.1%</div>
+          <div class="type-metric-md text-foreground">32.1%</div>
           <div class="flex items-center pt-1">
             <ArrowUpRight class="h-4 w-4 text-red-500 mr-1" />
             <span class="text-xs text-red-500 font-medium">+2.5%</span>

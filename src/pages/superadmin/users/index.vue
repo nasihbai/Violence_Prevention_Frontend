@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-foreground">
+        <h1 class="type-page-title text-foreground">
           Users Management
         </h1>
         <p class="text-muted-foreground mt-1">

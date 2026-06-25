@@ -60,7 +60,7 @@
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
   
-    --card: 240 10% 3.9%;
+    --card: 240 6% 10%;
     --card-foreground: 0 0% 98%;
   
     --popover: 240 10% 3.9%;
@@ -187,18 +187,71 @@
   }
 
   /*
-   * Planix scheme — dark-first premium palette ported from the Planix
-   * template. Defined on both the base and `.dark` selectors with the same
-   * values so the app reads as Planix regardless of the light/dark class.
-   * Raw surface/accent extras (--panel, --accent-coral, …) live in
-   * planix-theme.css; this block only maps the Shadcn token names.
+   * Planix scheme — premium palette ported from the Planix template.
+   * The base selector is the LIGHT variant; `.dark` is the dark variant.
+   * Toggling the `.dark` class on <html> flips between them. Raw
+   * surface/accent extras (--panel, --accent-coral, …) live in
+   * planix-theme.css (also split light/dark); these blocks only map the
+   * Shadcn token names.
    */
-  [data-color-scheme="planix"],
+  [data-color-scheme="planix"] {
+    /* Light — warm sand page bg, cool gray cards that lift off it */
+    --background: 34 28% 87%;
+    --foreground: 24 10% 12%;
+
+    --card: 220 16% 97%;
+    --card-foreground: 24 10% 12%;
+
+    --popover: 40 33% 99%;
+    --popover-foreground: 24 10% 12%;
+
+    --primary: 12 78% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 36 18% 88%;
+    --secondary-foreground: 24 8% 22%;
+
+    --muted: 36 18% 89%;
+    --muted-foreground: 28 6% 40%;
+
+    --accent: 12 78% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 52% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 35 92% 45%;
+    --warning-foreground: 24 10% 12%;
+
+    --border: 220 12% 82%;
+    --input: 220 12% 82%;
+    --ring: 12 78% 55%;
+
+    --chart-1: 12 78% 55%;
+    --chart-2: 142 52% 40%;
+    --chart-3: 28 8% 55%;
+    --chart-4: 12 90% 64%;
+    --chart-5: 0 72% 55%;
+
+    --sidebar-background: 38 24% 95%;
+    --sidebar-foreground: 28 8% 28%;
+    --sidebar-primary: 12 78% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 36 20% 89%;
+    --sidebar-accent-foreground: 24 10% 15%;
+    --sidebar-border: 32 16% 85%;
+    --sidebar-ring: 12 78% 55%;
+  }
+
   [data-color-scheme="planix"].dark {
-    --background: 240 5.9% 3.3%;
+    /* Dark — near-black page bg, noticeably lighter card surfaces */
+    --background: 240 8% 4.5%;
     --foreground: 32 39% 93.5%;
 
-    --card: 220 8.1% 7.3%;
+    --card: 228 12% 13%;
     --card-foreground: 32 39% 93.5%;
 
     --popover: 220 8.1% 7.3%;
@@ -225,8 +278,8 @@
     --warning: 38 92% 60%;
     --warning-foreground: 13 48% 10%;
 
-    --border: 227 11.4% 15.5%;
-    --input: 227 11.4% 15.5%;
+    --border: 228 10% 20%;
+    --input: 228 10% 20%;
     --ring: 10 94.4% 72%;
 
     --chart-1: 10 94.4% 72%;

@@ -9,7 +9,7 @@ import { getApiUrl } from "@/services/api";
 import CameraTile from "@/components/CameraTile.vue";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import type { Severity } from "@/types/alerts";
+import { severityBadgeClass } from "@/lib/incident-styles";
 
 const streamsStore = useStreamsStore();
 const alertsStore = useAlertsStore();
@@ -35,13 +35,6 @@ const primaryCamera = computed(() => activeStreams.value[0] ?? null);
 // ---------- Ticker ----------
 const recentAlerts = computed(() => alerts.value.slice(0, 8));
 
-const severityColor: Record<Severity, string> = {
-  low: "bg-slate-200 text-slate-900 hover:bg-slate-200",
-  medium: "bg-amber-200 text-amber-900 hover:bg-amber-200",
-  high: "bg-orange-300 text-orange-950 hover:bg-orange-300",
-  critical: "bg-red-400 text-red-950 hover:bg-red-400",
-};
-
 function formatTime(iso: string): string {
   try {
     return new Date(iso).toLocaleTimeString();
@@ -64,7 +57,7 @@ const statCards = computed(() => [
     <!-- Header -->
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight">Live Monitoring</h1>
+        <h1 class="type-page-title text-foreground">Live Monitoring</h1>
         <p class="text-sm text-muted-foreground mt-1">
           Real-time detector feed, stats, and incoming alerts.
         </p>
@@ -72,7 +65,7 @@ const statCards = computed(() => [
       <Badge :variant="stats.is_running ? 'default' : 'secondary'" class="gap-1">
         <span
           class="inline-block w-2 h-2 rounded-full"
-          :class="stats.is_running ? 'bg-green-500' : 'bg-zinc-400'"
+          :class="stats.is_running ? 'bg-success' : 'bg-muted-foreground'"
         />
         {{ stats.is_running ? "Detector running" : "Detector stopped" }}
       </Badge>
@@ -111,14 +104,14 @@ const statCards = computed(() => [
           <Card v-for="card in statCards" :key="card.label">
             <CardHeader class="pb-2">
               <CardDescription>{{ card.label }}</CardDescription>
-              <CardTitle class="text-2xl">{{ card.value }}</CardTitle>
+              <CardTitle class="type-metric-md text-foreground">{{ card.value }}</CardTitle>
             </CardHeader>
           </Card>
         </div>
         <Card>
           <CardHeader class="pb-2">
             <CardDescription>Uptime</CardDescription>
-            <CardTitle class="text-2xl">{{ stats.uptime || "—" }}</CardTitle>
+            <CardTitle class="type-metric-md text-foreground">{{ stats.uptime || "—" }}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -140,7 +133,7 @@ const statCards = computed(() => [
             :key="alert.id"
             class="py-3 flex items-center gap-3"
           >
-            <Badge v-if="alert.severity" :class="severityColor[alert.severity]">
+            <Badge v-if="alert.severity" :class="severityBadgeClass(alert.severity)">
               {{ alert.severity }}
             </Badge>
             <Badge variant="outline">{{ alert.type }}</Badge>

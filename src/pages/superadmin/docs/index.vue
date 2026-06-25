@@ -2,7 +2,7 @@
   <div class="container space-y-6">
     <div class="flex justify-between items-center">
       <div>
-        <h1 class="text-4xl font-bold text-gradient">jBoilerplate Docs</h1>
+        <h1 class="type-page-title text-foreground">jBoilerplate Docs</h1>
         <p class="text-muted-foreground mt-1">Your comprehensive guide to building with jBoilerplate</p>
       </div>
       <div class="flex gap-2">

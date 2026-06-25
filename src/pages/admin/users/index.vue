@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight">User Management</h1>
+        <h1 class="type-page-title text-foreground">User Management</h1>
         <p class="text-muted-foreground">Manage all system users and their permissions</p>
       </div>
       <div class="flex space-x-2">
@@ -182,9 +182,9 @@ const columns = [
   { key: 'role', label: 'Role', sortable: true, searchable: true,
     render: (user: any) => {
       const colorMap: Record<string, string> = {
-        admin: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-        manager: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-        user: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
+        admin: 'bg-destructive/15 text-destructive border border-destructive/30',
+        manager: 'bg-primary/15 text-primary border border-primary/30',
+        user: 'bg-success/15 text-success border border-success/30',
       };
       return h(Badge, { class: colorMap[user.role] || '' }, () => user.role);
     } 

@@ -225,7 +225,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <h1 class="text-3xl font-bold mb-6">API Keys</h1>
+    <h1 class="type-page-title text-foreground mb-6">API Keys</h1>
     
     <div class="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center mb-6">
       <p class="text-muted-foreground max-w-xl">

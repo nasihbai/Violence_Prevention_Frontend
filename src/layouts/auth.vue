@@ -1,10 +1,14 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useColorMode } from "@vueuse/core";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+import { Sun, Moon } from "lucide-vue-next";
 
-// Initialize color mode
 const mode = useColorMode();
 const router = useRouter();
+const route = useRoute();
+const { t } = useI18n();
 
 function toggleMode() {
   mode.value = mode.value === "dark" ? "light" : "dark";
@@ -13,116 +17,129 @@ function toggleMode() {
 function navigateTo(path: string) {
   router.push(path);
 }
+
+// Artwork copy varies by the auth route (login / signup / forgot).
+const artwork = computed(() => {
+  const path = route.path;
+  if (path.startsWith("/register")) {
+    return {
+      title: t("auth.artwork.signupTitle"),
+      description: t("auth.artwork.signupDescription"),
+    };
+  }
+  if (path.startsWith("/forgot-password")) {
+    return {
+      title: t("auth.artwork.forgotTitle"),
+      description: t("auth.artwork.forgotDescription"),
+    };
+  }
+  return {
+    title: t("auth.artwork.loginTitle"),
+    description: t("auth.artwork.loginDescription"),
+  };
+});
 </script>
 
 <template>
-  <div class="min-h-svh">
-    <div
-      class="container relative min-h-svh flex flex-col items-center justify-center px-4 md:grid lg:max-w-none lg:grid-cols-2 lg:px-0"
-    >
-      <!-- Theme Toggle Button -->
+  <div class="min-h-svh bg-background text-foreground">
+    <div class="grid min-h-svh lg:grid-cols-2">
+      <!-- Theme Toggle -->
       <button
+        class="fixed right-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/60 text-muted-foreground backdrop-blur-md transition hover:text-foreground"
+        :aria-label="mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
         @click="toggleMode"
-        class="fixed right-4 top-4 z-50 rounded-lg p-2 hover:bg-muted"
-        aria-label="Toggle theme"
       >
-        <svg
-          v-if="mode === 'dark'"
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="h-6 w-6 text-yellow-300"
-        >
-          <circle cx="12" cy="12" r="4"></circle>
-          <path d="M12 2v2"></path>
-          <path d="M12 20v2"></path>
-          <path d="m4.93 4.93 1.41 1.41"></path>
-          <path d="m17.66 17.66 1.41 1.41"></path>
-          <path d="M2 12h2"></path>
-          <path d="M20 12h2"></path>
-          <path d="m6.34 17.66-1.41 1.41"></path>
-          <path d="m19.07 4.93-1.41 1.41"></path>
-        </svg>
-        <svg
-          v-else
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="h-6 w-6 text-slate-700"
-        >
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
-        </svg>
+        <Sun v-if="mode === 'dark'" class="h-5 w-5" />
+        <Moon v-else class="h-5 w-5" />
       </button>
 
-      <!-- Left: Logo & Image -->
-      <div
-        class="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex"
-      >
-        <div class="absolute inset-0 bg-zinc-900">
-          <img
-            src="@/assets/login.jpg"
-            alt="Authentication"
-            class="h-full w-full object-cover opacity-30"
-          />
-        </div>
-        <div class="relative z-20 flex items-center text-lg font-medium">
+      <!-- Left: Artwork panel -->
+      <div class="relative hidden overflow-hidden bg-[#07090d] lg:block">
+        <img
+          src="@/assets/login.jpg"
+          alt=""
+          class="absolute inset-0 h-full w-full object-cover object-center opacity-80"
+        />
+        <!-- Planix overlay gradients -->
+        <div
+          class="absolute inset-0"
+          style="
+            background:
+              linear-gradient(180deg, rgba(229,143,101,0.14) 0%, rgba(11,20,22,0.22) 32%, rgba(4,7,8,0.62) 100%),
+              radial-gradient(circle at 18% 18%, rgba(251,138,116,0.18), transparent 34%),
+              radial-gradient(circle at 82% 80%, rgba(67,164,160,0.12), transparent 38%);
+          "
+        />
+        <div
+          class="absolute inset-0"
+          style="
+            background: radial-gradient(circle at center, transparent 32%, rgba(3,5,8,0.2) 68%, rgba(3,5,8,0.4) 100%);
+          "
+        />
+
+        <!-- Brand mark top-left -->
+        <div class="relative z-10 flex items-center gap-3 p-8">
           <img
             src="@/assets/logo.png"
             alt="logo"
-            class="h-16 w-auto rounded-lg"
+            class="h-12 w-auto rounded-lg drop-shadow-md"
           />
         </div>
-        <div class="relative z-20 mt-auto">
-          <div class="space-y-2">
-            <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-white">
-              EYES of Soteria
-            </h1>
-            <p class="text-slate-300">
-              AI-powered violence detection &amp; safety monitoring
+
+        <!-- Copy card bottom -->
+        <div class="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-start p-8 xl:p-12">
+          <div
+            class="max-w-[26rem] rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(11,14,18,0.32),rgba(11,14,18,0.6))] px-6 py-5 text-left shadow-2xl backdrop-blur-md"
+          >
+            <p class="type-card-title text-balance text-white">
+              {{ artwork.title }}
+            </p>
+            <p class="mt-3 max-w-[22rem] text-sm leading-6 text-white/70">
+              {{ artwork.description }}
             </p>
           </div>
         </div>
       </div>
 
-      <!-- Right: Auth Content -->
-      <div class="py-6 lg:p-8">
-        <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+      <!-- Right: Auth content -->
+      <div class="relative flex w-full flex-col justify-center px-5 py-8 sm:px-8 lg:px-12">
+        <div class="mx-auto flex w-full max-w-[420px] flex-col">
+          <!-- Brand header -->
+          <div class="mb-8 flex items-center gap-3">
+            <img
+              src="@/assets/logo.png"
+              alt="logo"
+              class="h-11 w-auto rounded-lg lg:hidden"
+            />
+            <span class="type-card-title font-semibold text-foreground">
+              {{ t("auth.brandName") }}
+            </span>
+          </div>
+
           <slot />
-          
-          <!-- Footer with links -->
-          <div class="mt-8 text-center text-sm text-muted-foreground">
-            <div class="flex justify-center space-x-4">
+
+          <!-- Footer links -->
+          <div class="mt-10 text-center text-sm text-muted-foreground">
+            <div class="flex justify-center gap-4">
               <button
+                class="transition-colors hover:text-primary"
                 @click="navigateTo('/about')"
-                class="hover:text-primary transition-colors"
               >
-                About Us
+                {{ t("auth.footer.aboutUs") }}
               </button>
-              <span class="text-muted-foreground/50">|</span>
+              <span class="text-muted-foreground/40">|</span>
               <button
+                class="transition-colors hover:text-primary"
                 @click="navigateTo('/privacy-policy')"
-                class="hover:text-primary transition-colors"
               >
-                Privacy
+                {{ t("auth.footer.privacy") }}
               </button>
-              <span class="text-muted-foreground/50">|</span>
+              <span class="text-muted-foreground/40">|</span>
               <button
+                class="transition-colors hover:text-primary"
                 @click="navigateTo('/terms-of-service')"
-                class="hover:text-primary transition-colors"
               >
-                Terms
+                {{ t("auth.footer.terms") }}
               </button>
             </div>
           </div>
@@ -130,4 +147,4 @@ function navigateTo(path: string) {
       </div>
     </div>
   </div>
-</template> 
+</template>

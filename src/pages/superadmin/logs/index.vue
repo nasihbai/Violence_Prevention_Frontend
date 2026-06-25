@@ -234,7 +234,7 @@ defineOptions({
 
 <template>
   <div>
-    <h1 class="text-3xl font-bold mb-2">Logs & Activity</h1>
+    <h1 class="type-page-title text-foreground mb-2">Logs & Activity</h1>
     <p class="text-muted-foreground mb-6">
       Monitor system events and user activity across the platform
     </p>
@@ -342,10 +342,10 @@ defineOptions({
                 <span 
                   class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                   :class="{
-                    'bg-blue-100 text-blue-800': log.type === 'auth',
-                    'bg-green-100 text-green-800': log.type === 'system',
-                    'bg-purple-100 text-purple-800': log.type === 'config',
-                    'bg-red-100 text-red-800': log.type === 'error'
+                    'bg-primary/15 text-primary border border-primary/30': log.type === 'auth',
+                    'bg-success/15 text-success border border-success/30': log.type === 'system',
+                    'bg-muted text-muted-foreground border border-border': log.type === 'config',
+                    'bg-destructive/15 text-destructive border border-destructive/30': log.type === 'error'
                   }"
                 >
                   {{ log.type }}
@@ -402,10 +402,10 @@ defineOptions({
               <span 
                 class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                 :class="{
-                  'bg-blue-100 text-blue-800': selectedLog.type === 'auth',
-                  'bg-green-100 text-green-800': selectedLog.type === 'system',
-                  'bg-purple-100 text-purple-800': selectedLog.type === 'config',
-                  'bg-red-100 text-red-800': selectedLog.type === 'error'
+                  'bg-primary/15 text-primary border border-primary/30': selectedLog.type === 'auth',
+                  'bg-success/15 text-success border border-success/30': selectedLog.type === 'system',
+                  'bg-muted text-muted-foreground border border-border': selectedLog.type === 'config',
+                  'bg-destructive/15 text-destructive border border-destructive/30': selectedLog.type === 'error'
                 }"
               >
                 {{ selectedLog.type }}

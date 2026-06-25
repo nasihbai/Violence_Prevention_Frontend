@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight">System Settings</h1>
+        <h1 class="type-page-title text-foreground">System Settings</h1>
         <p class="text-muted-foreground">Manage critical system configurations</p>
       </div>
       <div class="flex space-x-2">
@@ -178,10 +178,10 @@
                     <Badge 
                       :variant="log.level === 'error' || log.level === 'critical' ? 'destructive' : 'secondary'"
                       :class="{
-                        'bg-blue-100 text-blue-800': log.level === 'info',
-                        'bg-yellow-100 text-yellow-800': log.level === 'warning',
-                        'bg-red-100 text-red-800': log.level === 'error',
-                        'bg-red-200 text-red-900': log.level === 'critical'
+                        'bg-primary/15 text-primary border border-primary/30': log.level === 'info',
+                        'bg-warning/15 text-warning border border-warning/30': log.level === 'warning',
+                        'bg-destructive/15 text-destructive border border-destructive/30': log.level === 'error',
+                        'bg-destructive/25 text-destructive border border-destructive/40': log.level === 'critical'
                       }"
                     >
                       {{ log.level }}

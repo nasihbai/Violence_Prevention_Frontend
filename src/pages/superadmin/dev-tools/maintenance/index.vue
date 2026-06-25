@@ -161,7 +161,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <h1 class="text-3xl font-bold mb-6">Maintenance Mode</h1>
+    <h1 class="type-page-title text-foreground mb-6">Maintenance Mode</h1>
     
     <p class="text-muted-foreground mb-6">
       Enable maintenance mode to temporarily make the application unavailable to users

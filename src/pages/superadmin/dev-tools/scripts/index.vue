@@ -135,7 +135,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <h1 class="text-3xl font-bold mb-6">Custom Scripts</h1>
+    <h1 class="type-page-title text-foreground mb-6">Custom Scripts</h1>
     
     <p class="text-muted-foreground mb-6">
       Add custom JavaScript or CSS scripts to be injected into the application. 
@@ -156,11 +156,11 @@ onMounted(() => {
       <TabsList class="grid w-full grid-cols-2">
         <TabsTrigger value="head">
           Head Scripts
-          <span v-if="scriptStatus.head" class="ml-2 inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+          <span v-if="scriptStatus.head" class="ml-2 inline-flex h-2 w-2 rounded-full bg-success"></span>
         </TabsTrigger>
         <TabsTrigger value="body">
           Body Scripts
-          <span v-if="scriptStatus.body" class="ml-2 inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+          <span v-if="scriptStatus.body" class="ml-2 inline-flex h-2 w-2 rounded-full bg-success"></span>
         </TabsTrigger>
       </TabsList>
       

@@ -56,7 +56,7 @@ const setLocale = (e: Event) => {
 
 <template>
   <div class="flex flex-col gap-6 p-6">
-    <h1 class="text-3xl font-bold">Kitchen Sink</h1>
+    <h1 class="type-page-title text-foreground">Kitchen Sink</h1>
     <p class="text-muted-foreground">
       This page showcases various UI components and features available in the application.
     </p>

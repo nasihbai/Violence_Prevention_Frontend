@@ -248,7 +248,7 @@ defineOptions({
 
 <template>
   <div>
-    <h1 class="text-3xl font-bold mb-6">Email Settings</h1>
+    <h1 class="type-page-title text-foreground mb-6">Email Settings</h1>
     
     <Tabs v-model="activeTab" class="w-full">
       <TabsList class="grid w-full grid-cols-2">

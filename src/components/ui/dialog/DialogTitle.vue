@@ -13,7 +13,7 @@ const forwardedProps = useForwardProps(props)
     v-bind="forwardedProps"
     :class="
       cn(
-        'text-lg font-semibold leading-none tracking-tight',
+        'type-card-title text-foreground',
         props.class,
       )
     "

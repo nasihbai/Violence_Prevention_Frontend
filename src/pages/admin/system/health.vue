@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6 max-w-5xl mx-auto">
     <header class="mb-6">
-      <h1 class="text-3xl font-bold tracking-tight mb-2">System Health</h1>
+      <h1 class="type-page-title text-foreground mb-2">System Health</h1>
       <p class="text-muted-foreground">Monitor the status and performance of your application</p>
     </header>
 

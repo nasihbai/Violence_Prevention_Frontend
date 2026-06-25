@@ -2,7 +2,7 @@
   <div class="container mx-auto p-4 space-y-8">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 class="text-3xl font-bold">Projects</h1>
+        <h1 class="type-page-title text-foreground">Projects</h1>
         <p class="text-muted-foreground mt-1">Manage your projects and workflows</p>
       </div>
       <div class="flex items-center gap-2">
@@ -22,7 +22,7 @@
         <div class="bg-primary/10 p-4 rounded-full mb-4">
           <FolderIcon class="h-12 w-12 text-primary" />
         </div>
-        <h2 class="text-2xl font-bold mb-2">Projects Placeholder</h2>
+        <h2 class="type-card-title text-foreground mb-2">Projects Placeholder</h2>
         <p class="text-muted-foreground max-w-md mb-6">
           This is a placeholder for the Projects module. In a real application, 
           you would implement business-specific project management features here.

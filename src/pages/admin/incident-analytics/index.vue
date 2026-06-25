@@ -57,7 +57,7 @@ const summary = computed(() => {
   <div class="space-y-6">
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight">Incident Analytics</h1>
+        <h1 class="type-page-title text-foreground">Incident Analytics</h1>
         <p class="text-sm text-muted-foreground mt-1">
           Trends across all recorded violence/threat incidents.
         </p>
@@ -97,7 +97,7 @@ const summary = computed(() => {
         <Card v-for="card in summary" :key="card.label">
           <CardHeader class="pb-2">
             <CardDescription>{{ card.label }}</CardDescription>
-            <CardTitle class="text-3xl">{{ card.value }}</CardTitle>
+            <CardTitle class="type-metric-md text-foreground">{{ card.value }}</CardTitle>
           </CardHeader>
         </Card>
       </div>

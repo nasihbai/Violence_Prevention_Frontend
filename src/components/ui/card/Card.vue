@@ -11,7 +11,7 @@ const props = defineProps<{
   <div
     :class="
       cn(
-        'panel-surface rounded-xl text-card-foreground shadow-sm',
+        'panel-surface rounded-xl text-card-foreground',
         props.class,
       )
     "

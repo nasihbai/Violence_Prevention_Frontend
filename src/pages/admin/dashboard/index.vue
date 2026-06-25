@@ -10,6 +10,7 @@ import CameraTile from "@/components/CameraTile.vue";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Video } from "lucide-vue-next";
+import { severityBadgeClass } from "@/lib/incident-styles";
 import type { Alert, Severity } from "@/types/alerts";
 
 const streamsStore = useStreamsStore();
@@ -104,13 +105,6 @@ const alertingCameraIds = computed(() => {
   return ids;
 });
 
-const severityColor: Record<Severity, string> = {
-  low: "bg-slate-200 text-slate-900 hover:bg-slate-200",
-  medium: "bg-amber-200 text-amber-900 hover:bg-amber-200",
-  high: "bg-orange-300 text-orange-950 hover:bg-orange-300",
-  critical: "bg-red-400 text-red-950 hover:bg-red-400",
-};
-
 function formatTime(iso: string): string {
   try {
     return new Date(iso).toLocaleTimeString();
@@ -157,7 +151,7 @@ const typeLabel: Record<Alert["type"], string> = {
     <!-- Header -->
     <div class="flex items-center justify-between flex-wrap gap-3">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight">Surveillance Dashboard</h1>
+        <h1 class="type-page-title text-foreground">Surveillance Dashboard</h1>
         <p class="text-sm text-muted-foreground mt-1">
           Live camera feeds and real-time violence detection alerts.
         </p>
@@ -170,7 +164,7 @@ const typeLabel: Record<Alert["type"], string> = {
         <Badge :variant="stats.is_running ? 'default' : 'secondary'" class="gap-1">
           <span
             class="inline-block w-2 h-2 rounded-full"
-            :class="stats.is_running ? 'bg-green-500' : 'bg-zinc-400'"
+            :class="stats.is_running ? 'bg-success' : 'bg-muted-foreground'"
           />
           {{ stats.is_running ? "Detector running" : "Detector stopped" }}
         </Badge>
@@ -257,7 +251,7 @@ const typeLabel: Record<Alert["type"], string> = {
 
               <!-- Footer: severity + detection label -->
               <div class="flex items-center gap-2">
-                <Badge v-if="alert.severity" :class="severityColor[alert.severity]">
+                <Badge v-if="alert.severity" :class="severityBadgeClass(alert.severity)">
                   {{ alert.severity }}
                 </Badge>
                 <span class="text-sm text-muted-foreground">{{ typeLabel[alert.type] }}</span>

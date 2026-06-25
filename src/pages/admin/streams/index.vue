@@ -156,7 +156,7 @@ async function onDelete(stream: Stream) {
     <!-- Header -->
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight">Cameras</h1>
+        <h1 class="type-page-title text-foreground">Cameras</h1>
         <p class="text-sm text-muted-foreground mt-1">
           Register and manage the camera streams the detector monitors.
         </p>

@@ -157,7 +157,7 @@ defineOptions({
 
 <template>
   <div>
-    <h1 class="text-3xl font-bold mb-2">Environment Variables</h1>
+    <h1 class="type-page-title text-foreground mb-2">Environment Variables</h1>
     <p class="text-muted-foreground mb-6">
       Manage environment variables for your application
     </p>

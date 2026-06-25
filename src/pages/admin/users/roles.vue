@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight">Role Management</h1>
+        <h1 class="type-page-title text-foreground">Role Management</h1>
         <p class="text-muted-foreground">Manage roles and permissions</p>
       </div>
       <Button @click="openCreateDialog">

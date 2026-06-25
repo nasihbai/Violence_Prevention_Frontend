@@ -173,7 +173,7 @@ onUnmounted(() => {
         <DashboardHeader />
 
         <!-- Page content -->
-        <main class="flex-1 overflow-y-auto bg-background">
+        <main class="flex-1 overflow-y-auto bg-app-gradient">
           <div class="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 sm:py-6">
             <div :key="route.path" class="panel-pop-in">
               <slot />

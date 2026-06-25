@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <header class="mb-6">
-      <h1 class="text-2xl font-bold tracking-tight">Admin Settings</h1>
+      <h1 class="type-page-title text-foreground">Admin Settings</h1>
       <p class="text-muted-foreground">Configure admin-level settings and user preferences</p>
     </header>
     

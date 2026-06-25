@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-8 max-w-5xl mx-auto">
     <header class="mb-6">
-      <h1 class="text-3xl font-bold tracking-tight mb-2">API Reference</h1>
+      <h1 class="type-page-title text-foreground mb-2">API Reference</h1>
       <p class="text-muted-foreground">Complete documentation for the jBoilerplate REST API</p>
     </header>
 
@@ -355,7 +355,7 @@
                 <CardTitle class="text-base">Standard Plan</CardTitle>
               </CardHeader>
               <CardContent class="p-4 pt-0">
-                <p class="text-3xl font-bold">100</p>
+                <p class="type-metric-md text-foreground">100</p>
                 <p class="text-sm text-muted-foreground">requests per minute</p>
               </CardContent>
             </Card>
@@ -365,7 +365,7 @@
                 <CardTitle class="text-base">Professional Plan</CardTitle>
               </CardHeader>
               <CardContent class="p-4 pt-0">
-                <p class="text-3xl font-bold">500</p>
+                <p class="type-metric-md text-foreground">500</p>
                 <p class="text-sm text-muted-foreground">requests per minute</p>
               </CardContent>
             </Card>
@@ -375,7 +375,7 @@
                 <CardTitle class="text-base">Enterprise Plan</CardTitle>
               </CardHeader>
               <CardContent class="p-4 pt-0">
-                <p class="text-3xl font-bold">2000</p>
+                <p class="type-metric-md text-foreground">2000</p>
                 <p class="text-sm text-muted-foreground">requests per minute</p>
               </CardContent>
             </Card>

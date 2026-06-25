@@ -60,7 +60,7 @@ function formatTime(iso: string): string {
     <!-- Header -->
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight">Detection Activity</h1>
+        <h1 class="type-page-title text-foreground">Detection Activity</h1>
         <p class="text-sm text-muted-foreground mt-1">
           Detector health and the raw per-frame detection log.
         </p>
@@ -69,7 +69,7 @@ function formatTime(iso: string): string {
         <Badge :variant="stats.is_running ? 'default' : 'secondary'" class="gap-1">
           <span
             class="inline-block w-2 h-2 rounded-full"
-            :class="stats.is_running ? 'bg-green-500' : 'bg-zinc-400'"
+            :class="stats.is_running ? 'bg-success' : 'bg-muted-foreground'"
           />
           {{ stats.is_running ? "Detector running" : "Detector stopped" }}
         </Badge>
@@ -82,7 +82,7 @@ function formatTime(iso: string): string {
       <Card v-for="card in statusCards" :key="card.label">
         <CardHeader class="pb-2">
           <CardDescription>{{ card.label }}</CardDescription>
-          <CardTitle class="text-2xl">{{ card.value }}</CardTitle>
+          <CardTitle class="type-metric-md text-foreground">{{ card.value }}</CardTitle>
         </CardHeader>
       </Card>
     </div>

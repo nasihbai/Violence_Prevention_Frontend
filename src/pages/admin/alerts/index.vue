@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Inbox } from "lucide-vue-next";
 import CameraTile from "@/components/CameraTile.vue";
+import { severityBadgeClass } from "@/lib/incident-styles";
 import type { Alert, Severity, IncidentStatus } from "@/types/alerts";
 
 const router = useRouter();
@@ -64,13 +65,6 @@ onBeforeUnmount(() => {
 });
 
 // ---------- UI helpers ----------
-
-const severityColor: Record<Severity, string> = {
-  low: "bg-slate-200 text-slate-900 hover:bg-slate-200",
-  medium: "bg-amber-200 text-amber-900 hover:bg-amber-200",
-  high: "bg-orange-300 text-orange-950 hover:bg-orange-300",
-  critical: "bg-red-400 text-red-950 hover:bg-red-400",
-};
 
 // Radix/reka Select rejects empty-string values — they're reserved to mean
 // "no selection". Use a sentinel ("all") instead and translate to undefined
@@ -234,7 +228,7 @@ function flashCameraForAlert(alert: Alert) {
     <!-- Header -->
     <div class="flex items-center justify-between flex-wrap gap-4">
       <div>
-        <h1 class="text-3xl font-bold tracking-tight">Alerts</h1>
+        <h1 class="type-page-title text-foreground">Alerts</h1>
         <p class="text-sm text-muted-foreground mt-1">
           Live violence-detection alerts from connected cameras.
         </p>
@@ -243,7 +237,7 @@ function flashCameraForAlert(alert: Alert) {
         <Badge :variant="socketConnected ? 'default' : 'secondary'" class="gap-1">
           <span
             class="inline-block w-2 h-2 rounded-full"
-            :class="socketConnected ? 'bg-green-500' : 'bg-zinc-400'"
+            :class="socketConnected ? 'bg-success' : 'bg-muted-foreground'"
           />
           {{ socketConnected ? "Live" : "Disconnected" }}
         </Badge>
@@ -297,19 +291,19 @@ function flashCameraForAlert(alert: Alert) {
       <Card>
         <CardHeader class="pb-2">
           <CardDescription>Total (current filter)</CardDescription>
-          <CardTitle class="text-3xl">{{ total }}</CardTitle>
+          <CardTitle class="type-metric-md text-foreground">{{ total }}</CardTitle>
         </CardHeader>
       </Card>
       <Card>
         <CardHeader class="pb-2">
           <CardDescription>Unacknowledged (on this page)</CardDescription>
-          <CardTitle class="text-3xl">{{ unacknowledgedCount }}</CardTitle>
+          <CardTitle class="type-metric-md text-foreground">{{ unacknowledgedCount }}</CardTitle>
         </CardHeader>
       </Card>
       <Card>
         <CardHeader class="pb-2">
           <CardDescription>WebSocket</CardDescription>
-          <CardTitle class="text-3xl">
+          <CardTitle class="type-metric-md text-foreground">
             {{ socketConnected ? "Connected" : "—" }}
           </CardTitle>
         </CardHeader>
@@ -451,7 +445,7 @@ function flashCameraForAlert(alert: Alert) {
           >
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2 flex-wrap">
-                <Badge v-if="alert.severity" :class="severityColor[alert.severity]">
+                <Badge v-if="alert.severity" :class="severityBadgeClass(alert.severity)">
                   {{ alert.severity }}
                 </Badge>
                 <Badge variant="outline">{{ alert.type }}</Badge>

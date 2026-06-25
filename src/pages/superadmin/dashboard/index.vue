@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-foreground">
+        <h1 class="type-page-title text-foreground">
           Superadmin Dashboard
         </h1>
         <p class="text-muted-foreground mt-1">
@@ -29,7 +29,7 @@
           <UserIcon class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">1,258</div>
+          <div class="type-metric-md text-foreground">1,258</div>
           <p class="text-xs text-muted-foreground mt-1">
             +12% from last month
           </p>
@@ -41,7 +41,7 @@
           <FolderIcon class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">87</div>
+          <div class="type-metric-md text-foreground">87</div>
           <p class="text-xs text-muted-foreground mt-1">
             +5% from last month
           </p>
@@ -53,7 +53,7 @@
           <ActivityIcon class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">42%</div>
+          <div class="type-metric-md text-foreground">42%</div>
           <p class="text-xs text-muted-foreground mt-1">
             -8% from last month
           </p>
@@ -65,7 +65,7 @@
           <DatabaseIcon class="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div class="text-2xl font-bold">1.2 TB</div>
+          <div class="type-metric-md text-foreground">1.2 TB</div>
           <p class="text-xs text-muted-foreground mt-1">
             +15% from last month
           </p>

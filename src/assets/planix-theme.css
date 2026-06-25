@@ -12,29 +12,11 @@
  */
 
 :root {
-  /* Surfaces */
-  --panel: #111214;
-  --panel-strong: #18191d;
-  --panel-soft: #1f2025;
-  --panel-muted: #23252c;
-  --border-soft: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.1);
-
-  /* Accent */
-  --accent-coral: #fb8a74;
-  --accent-strong: #ff9b83;
-  --accent-soft: rgba(251, 138, 116, 0.14);
-
-  /* Status */
-  --planix-green: #65d38c;
-  --planix-red: #ef6363;
-
-  /* Radii */
+  /* Theme-agnostic: radii + type scale (same in light and dark) */
   --radius-xl: 16px;
   --radius-lg: 12px;
   --radius-md: 10px;
 
-  /* Type scale */
   --font-size-body: 0.9375rem;
   --font-size-caption: 0.75rem;
   --font-size-label: 0.8125rem;
@@ -45,12 +27,49 @@
   --font-size-metric-md: 2.2rem;
   --font-size-metric-lg: 2.65rem;
 
-  /* Charts */
-  --chart-grid: rgba(255, 255, 255, 0.08);
   --chart-axis: #8f8a86;
   --chart-series-primary: var(--accent-coral);
-  --chart-series-secondary: rgba(255, 255, 255, 0.18);
   --chart-series-muted: #d7d8df;
+}
+
+/* Surface + accent vars — LIGHT variant (base selector, no .dark) */
+[data-color-scheme="planix"] {
+  --panel: #f6f7f9;
+  --panel-strong: #eceef2;
+  --panel-soft: #e2e5ea;
+  --panel-muted: #d5d9e0;
+  --border-soft: rgba(70, 75, 85, 0.16);
+  --border-strong: rgba(70, 75, 85, 0.24);
+
+  --accent-coral: #e2683f;
+  --accent-strong: #d65a30;
+  --accent-soft: rgba(226, 104, 63, 0.12);
+
+  --planix-green: #2f9e54;
+  --planix-red: #d64545;
+
+  --chart-grid: rgba(20, 18, 16, 0.08);
+  --chart-series-secondary: rgba(20, 18, 16, 0.18);
+}
+
+/* Surface + accent vars — DARK variant */
+[data-color-scheme="planix"].dark {
+  --panel: #1c1e26;
+  --panel-strong: #242730;
+  --panel-soft: #2c2f3a;
+  --panel-muted: #343844;
+  --border-soft: rgba(255, 255, 255, 0.16);
+  --border-strong: rgba(255, 255, 255, 0.22);
+
+  --accent-coral: #fb8a74;
+  --accent-strong: #ff9b83;
+  --accent-soft: rgba(251, 138, 116, 0.14);
+
+  --planix-green: #65d38c;
+  --planix-red: #ef6363;
+
+  --chart-grid: rgba(255, 255, 255, 0.08);
+  --chart-series-secondary: rgba(255, 255, 255, 0.18);
 }
 
 /* Planix uses a coral text selection across the app. */
@@ -75,15 +94,287 @@
  * un-layered also guarantees they're never tree-shaken. They load after
  * index.css's `@tailwind utilities`, so they win equal-specificity ties.
  */
+/*
+ * Base card surface — works for every color scheme via Shadcn tokens.
+ * Planix-specific rules below add the premium 3D gradient treatment.
+ */
 .panel-surface {
-  background: var(--panel);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    linear-gradient(165deg, hsl(var(--card)) 0%, hsl(var(--card)) 100%);
+  border: 1px solid hsl(var(--border));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    0 6px 16px -6px rgba(0, 0, 0, 0.12);
+  transition:
+    box-shadow 220ms ease,
+    transform 220ms ease,
+    border-color 220ms ease;
+}
+
+/* Top specular highlight — shared 3D bevel overlay */
+.panel-surface::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.04) 18%,
+    transparent 42%
+  );
+}
+
+.dark .panel-surface {
+  background:
+    linear-gradient(
+      168deg,
+      hsl(var(--card)) 0%,
+      hsl(var(--card)) 42%,
+      hsl(var(--background)) 100%
+    );
+  border-color: hsl(var(--border));
+  border-top-color: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 2px 4px rgba(0, 0, 0, 0.35),
+    0 10px 28px -8px rgba(0, 0, 0, 0.65);
+}
+
+.dark .panel-surface::before {
+  background:
+    radial-gradient(130% 70% at 50% -25%, rgba(255, 255, 255, 0.12), transparent 52%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      transparent 38%
+    );
+}
+
+/* Light (all schemes): cool gray 3D card with top highlight + bottom depth */
+html:not(.dark) .panel-surface {
+  background:
+    linear-gradient(
+      168deg,
+      #fcfcfd 0%,
+      #f2f4f7 46%,
+      #e6e9ee 100%
+    );
+  border: 1px solid hsl(var(--border));
+  border-top-color: rgba(255, 255, 255, 0.98);
+  border-bottom-color: rgba(90, 96, 108, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.98),
+    inset 0 -1px 0 rgba(100, 106, 118, 0.09),
+    0 1px 2px rgba(60, 66, 78, 0.06),
+    0 6px 18px -6px rgba(55, 60, 72, 0.14);
+}
+
+html:not(.dark) .panel-surface::before {
+  background:
+    radial-gradient(120% 75% at 50% -20%, rgba(255, 255, 255, 0.85), transparent 54%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(210, 216, 226, 0.12) 26%,
+      transparent 46%,
+      rgba(160, 168, 182, 0.07) 100%
+    );
+}
+
+/* Light Planix: richer gray gradient + soft side shading */
+[data-color-scheme="planix"]:not(.dark) .panel-surface {
+  background:
+    linear-gradient(
+      168deg,
+      #ffffff 0%,
+      #f4f5f8 38%,
+      #e8ebf0 72%,
+      #dde1e8 100%
+    );
+  border: 1px solid var(--border-soft);
+  border-top-color: rgba(255, 255, 255, 1);
+  border-bottom-color: rgba(80, 86, 98, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(100, 106, 118, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.6),
+    0 2px 5px rgba(65, 72, 84, 0.07),
+    0 10px 28px -10px rgba(55, 62, 74, 0.16),
+    0 18px 44px -16px rgba(50, 56, 68, 0.12);
+}
+
+[data-color-scheme="planix"]:not(.dark) .panel-surface::before {
+  background:
+    radial-gradient(115% 72% at 50% -22%, rgba(255, 255, 255, 0.95), transparent 56%),
+    radial-gradient(65% 55% at 100% 0%, rgba(180, 188, 202, 0.14), transparent 48%),
+    radial-gradient(55% 50% at 0% 100%, rgba(160, 170, 186, 0.1), transparent 52%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.75) 0%,
+      rgba(220, 226, 234, 0.18) 24%,
+      transparent 44%,
+      rgba(140, 148, 162, 0.08) 100%
+    );
+}
+
+/* Dark: deep 3D panel — top light, coral rim glow, bottom shadow falloff */
+[data-color-scheme="planix"].dark .panel-surface {
+  background:
+    linear-gradient(
+      168deg,
+      #282b36 0%,
+      var(--panel) 38%,
+      #15171d 100%
+    );
+  border: 1px solid var(--border-soft);
+  border-top-color: rgba(255, 255, 255, 0.2);
+  border-bottom-color: rgba(0, 0, 0, 0.45);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 1px 0 rgba(255, 255, 255, 0.04),
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    0 16px 40px -12px rgba(0, 0, 0, 0.75),
+    0 28px 64px -24px rgba(0, 0, 0, 0.85);
+}
+
+[data-color-scheme="planix"].dark .panel-surface::before {
+  background:
+    radial-gradient(120% 75% at 50% -22%, rgba(255, 255, 255, 0.16), transparent 55%),
+    radial-gradient(70% 55% at 100% 0%, rgba(251, 138, 116, 0.09), transparent 48%),
+    radial-gradient(55% 45% at 0% 100%, rgba(96, 130, 200, 0.06), transparent 50%),
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.07) 0%,
+      transparent 35%,
+      rgba(0, 0, 0, 0.12) 100%
+    );
+}
+
+/* Subtle lift on hover for interactive cards (links/buttons inside still work) */
+.panel-surface:has(a:hover),
+.panel-surface:has(button:hover),
+.panel-surface.panel-surface-interactive:hover {
+  transform: translateY(-1px);
+}
+
+[data-color-scheme="planix"].dark .panel-surface:has(a:hover),
+[data-color-scheme="planix"].dark .panel-surface:has(button:hover),
+[data-color-scheme="planix"].dark .panel-surface.panel-surface-interactive:hover {
+  border-top-color: rgba(255, 255, 255, 0.24);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+    0 2px 6px rgba(0, 0, 0, 0.45),
+    0 20px 48px -14px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(251, 138, 116, 0.08);
+}
+
+[data-color-scheme="planix"]:not(.dark) .panel-surface:has(a:hover),
+[data-color-scheme="planix"]:not(.dark) .panel-surface:has(button:hover),
+[data-color-scheme="planix"]:not(.dark) .panel-surface.panel-surface-interactive:hover {
+  border-top-color: rgba(255, 255, 255, 1);
+  border-bottom-color: rgba(80, 86, 98, 0.22);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(100, 106, 118, 0.12),
+    0 2px 6px rgba(65, 72, 84, 0.09),
+    0 14px 32px -12px rgba(55, 62, 74, 0.2),
+    0 22px 52px -18px rgba(50, 56, 68, 0.16);
+}
+
+html:not(.dark) .panel-surface-strong {
+  background:
+    linear-gradient(
+      168deg,
+      #f8f9fb 0%,
+      var(--panel-strong, #eceef2) 50%,
+      var(--panel-muted, #d5d9e0) 100%
+    );
+  border: 1px solid var(--border-soft, hsl(var(--border)));
+  border-top-color: rgba(255, 255, 255, 0.95);
+  border-bottom-color: rgba(90, 96, 108, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(100, 106, 118, 0.1),
+    0 8px 24px -12px rgba(55, 62, 74, 0.18);
+}
+
+.dark .panel-surface-strong {
+  background:
+    linear-gradient(
+      168deg,
+      hsl(var(--card)) 0%,
+      hsl(var(--card)) 55%,
+      hsl(var(--background)) 100%
+    );
+  border: 1px solid var(--border-soft, hsl(var(--border)));
+  border-top-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+    0 12px 32px -14px rgba(0, 0, 0, 0.55);
+}
+
+[data-color-scheme="planix"].dark .panel-surface-strong {
+  background:
+    linear-gradient(
+      168deg,
+      var(--panel-strong) 0%,
+      var(--panel) 55%,
+      var(--panel-muted) 100%
+    );
   border: 1px solid var(--border-soft);
 }
 
-  .panel-surface-strong {
-    background: var(--panel-strong);
-    border: 1px solid var(--border-soft);
-  }
+/* Modal fields — paneled inputs scoped to dialogs only (global Input is
+ * untouched). Targets text inputs + textarea; (0,2,1) beats shadcn utilities. */
+[data-color-scheme="planix"]
+  .planix-modal
+  :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    textarea
+  ) {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
+  background: var(--panel-soft);
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+
+[data-color-scheme="planix"]
+  .planix-modal
+  :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    textarea
+  ):focus {
+  outline: none;
+  border-color: hsl(var(--ring));
+  background: var(--panel-muted);
+}
+
+/* Subtle app background — a soft coral glow up top so the page isn't flat. */
+[data-color-scheme="planix"]:not(.dark) .bg-app-gradient {
+  background:
+    radial-gradient(1100px 460px at 78% -8%, rgba(226, 104, 63, 0.07), transparent 60%),
+    radial-gradient(900px 420px at 12% 4%, rgba(120, 150, 180, 0.06), transparent 58%),
+    hsl(var(--background));
+}
+
+[data-color-scheme="planix"].dark .bg-app-gradient {
+  background:
+    radial-gradient(1100px 480px at 80% -10%, rgba(251, 138, 116, 0.12), transparent 58%),
+    radial-gradient(900px 440px at 8% 2%, rgba(96, 130, 200, 0.08), transparent 56%),
+    hsl(var(--background));
+}
 
   .soft-pill {
     border: 1px solid var(--border-soft);
@@ -156,7 +447,22 @@
       0 20px 38px rgba(207, 109, 89, 0.24);
   }
 
+  /* Base (light): token-based so secondary buttons read on a light surface */
   .btn-secondary {
+    border-color: hsl(var(--border));
+    background: hsl(var(--secondary));
+    color: hsl(var(--secondary-foreground));
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .btn-secondary:hover {
+    border-color: hsl(var(--ring));
+    background: hsl(var(--muted));
+    color: hsl(var(--foreground));
+  }
+
+  /* Dark: keep the original premium "glass" treatment */
+  .dark .btn-secondary {
     border-color: rgba(255, 255, 255, 0.08);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025));
     color: var(--text-secondary, hsl(var(--muted-foreground)));
@@ -165,7 +471,7 @@
       0 10px 24px rgba(0, 0, 0, 0.12);
   }
 
-  .btn-secondary:hover {
+  .dark .btn-secondary:hover {
     border-color: rgba(251, 138, 116, 0.16);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
     color: hsl(var(--foreground));

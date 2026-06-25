@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft } from "lucide-vue-next";
-import type { Alert, Incident, IncidentStatus, Severity } from "@/types/alerts";
+import { severityBadgeClass, statusBadgeClass } from "@/lib/incident-styles";
+import type { Alert, Incident, IncidentStatus } from "@/types/alerts";
 
 const route = useRoute();
 const router = useRouter();
@@ -125,20 +126,6 @@ async function onDismiss(id: number) {
 
 // ---------- UI helpers ----------
 
-const severityColor: Record<Severity, string> = {
-  low: "bg-slate-200 text-slate-900 hover:bg-slate-200",
-  medium: "bg-amber-200 text-amber-900 hover:bg-amber-200",
-  high: "bg-orange-300 text-orange-950 hover:bg-orange-300",
-  critical: "bg-red-400 text-red-950 hover:bg-red-400",
-};
-
-const statusColor: Record<IncidentStatus, string> = {
-  open:           "bg-red-100 text-red-900 hover:bg-red-100",
-  investigating:  "bg-amber-100 text-amber-900 hover:bg-amber-100",
-  resolved:       "bg-emerald-100 text-emerald-900 hover:bg-emerald-100",
-  false_positive: "bg-slate-200 text-slate-700 hover:bg-slate-200",
-};
-
 function formatTime(iso: string | null | undefined): string {
   if (!iso) return "—";
   try {
@@ -161,12 +148,12 @@ function back() {
         <ArrowLeft class="w-4 h-4 mr-1" />
         Back
       </Button>
-      <h1 class="text-2xl font-bold tracking-tight">
+      <h1 class="type-page-title text-foreground">
         {{ incident?.incident_code || "Incident" }}
       </h1>
       <Badge
         v-if="incident"
-        :class="statusColor[incident.status]"
+        :class="statusBadgeClass(incident.status)"
       >
         {{ incident.status.replace("_", " ") }}
       </Badge>
@@ -210,7 +197,7 @@ function back() {
             <div>
               <dt class="text-muted-foreground">Severity</dt>
               <dd class="mt-1">
-                <Badge :class="severityColor[incident.severity]">
+                <Badge :class="severityBadgeClass(incident.severity)">
                   {{ incident.severity }}
                 </Badge>
               </dd>

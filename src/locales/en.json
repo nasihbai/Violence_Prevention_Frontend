@@ -40,7 +40,60 @@
     "loginSuccessful": "Login Successful",
     "logoutSuccessful": "Logout Successful",
     "incorrectCredentials": "Incorrect email or password",
-    "accountCreated": "Account created successfully"
+    "accountCreated": "Account created successfully",
+    "brandName": "EYES of Soteria",
+    "fillAllFields": "Please fill in all fields",
+    "login": {
+      "title": "Sign in to your account",
+      "subtitle": "Enter your email and password below to sign in",
+      "emailPlaceholder": "m@example.com",
+      "passwordPlaceholder": "••••••••",
+      "signingIn": "Signing in...",
+      "noAccount": "Don't have an account?",
+      "quickLogin": "Quick Login",
+      "quickLoginHint": "Superadmin: Platform manager | Admin: Regular admin | User: Standard user",
+      "roleSuperadmin": "Superadmin",
+      "roleAdmin": "Admin",
+      "roleUser": "User"
+    },
+    "register": {
+      "title": "Create an account",
+      "subtitle": "Enter your details to create your account",
+      "businessName": "Business Name",
+      "businessNamePlaceholder": "Your Business Name",
+      "emailPlaceholder": "name@example.com",
+      "passwordPlaceholder": "••••••••",
+      "creatingAccount": "Creating account...",
+      "createAccount": "Create account",
+      "haveAccount": "Already have an account?",
+      "orContinueWith": "Or continue with",
+      "passwordsDoNotMatch": "Passwords do not match",
+      "registrationSuccess": "Registration successful! Please check your email to verify your account.",
+      "registrationFailed": "Registration failed. Please try again."
+    },
+    "forgot": {
+      "title": "Forgot Password",
+      "subtitle": "Enter your email address and we'll send you instructions to reset your password",
+      "emailPlaceholder": "name@example.com",
+      "sending": "Sending...",
+      "sendInstructions": "Send Reset Instructions",
+      "rememberPassword": "Remember your password?",
+      "resetSent": "Password reset instructions have been sent to your email",
+      "enterEmail": "Please enter your email address"
+    },
+    "artwork": {
+      "loginTitle": "Your spaces stay protected, around the clock.",
+      "loginDescription": "Real-time AI violence detection keeps your environment safe so your team can focus on what matters.",
+      "signupTitle": "Set up safety monitoring in minutes.",
+      "signupDescription": "Create your workspace, connect your cameras, and start protecting your spaces without the noise.",
+      "forgotTitle": "You're one step from getting back to safety.",
+      "forgotDescription": "Reset your password and return to monitoring what matters most."
+    },
+    "footer": {
+      "aboutUs": "About Us",
+      "privacy": "Privacy",
+      "terms": "Terms"
+    }
   },
   "validation": {
     "required": "{field} is required",
