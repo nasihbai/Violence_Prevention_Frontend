@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
+import { onMounted, onUnmounted, computed, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useStreamsStore } from "@/stores/streams";
 import { useAlertsStore } from "@/stores/alerts";
@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Bell, Video } from "lucide-vue-next";
 import { severityBadgeClass } from "@/lib/incident-styles";
-import type { Alert, Severity } from "@/types/alerts";
+import type { Alert } from "@/types/alerts";
 
 const streamsStore = useStreamsStore();
 const alertsStore = useAlertsStore();
@@ -20,16 +20,34 @@ const { streams, activeStreams } = storeToRefs(streamsStore);
 const { alerts } = storeToRefs(alertsStore);
 const { stats } = storeToRefs(statsStore);
 
-// Initializing the socket singleton activates the violence_alert + stats_update
-// listeners so the grid + alert panel stay live once a backend is present.
-useSocket();
+// Camera tiles flash red for 5s when a live SocketIO alert fires, then go calm.
+// This is separate from the historical alerts store so old DB records don't
+// permanently keep the banner on.
+const flashingCameraIds = ref<Set<string>>(new Set());
+
+function flashCamera(alert: Alert) {
+  if (!alert.camera_id) return;
+  flashingCameraIds.value = new Set([...flashingCameraIds.value, alert.camera_id]);
+  setTimeout(() => {
+    const next = new Set(flashingCameraIds.value);
+    next.delete(alert.camera_id!);
+    flashingCameraIds.value = next;
+  }, 5000);
+}
+
+const socket = useSocket();
 
 onMounted(() => {
-  // All three fail gracefully (empty arrays) when no backend is reachable,
-  // which is what triggers the demo fallback below.
   streamsStore.fetchStreams();
   alertsStore.fetchAlerts();
   statsStore.fetchStats();
+
+  // Wire live flash directly off the SocketIO event, not the DB store.
+  socket.on("violence_alert", flashCamera);
+});
+
+onUnmounted(() => {
+  socket.off("violence_alert", flashCamera);
 });
 
 // ---------- Demo fallback data (offline preview, no backend) ----------
@@ -51,30 +69,6 @@ const DEMO_CAMERAS: CameraView[] = [
   { key: "d6", name: "Reception", location: "Level 2", streamId: "CAM_06", feedUrl: "", online: true },
 ];
 
-function demoAlert(id: number, type: Alert["type"], severity: Severity, camera_id: string, minutesAgo: number): Alert {
-  return {
-    id,
-    incident_id: id,
-    type,
-    confidence: 0.9,
-    timestamp: new Date(Date.now() - minutesAgo * 60_000).toISOString(),
-    acknowledged: false,
-    acknowledged_by: null,
-    acknowledged_at: null,
-    dismissed: false,
-    severity,
-    camera_id,
-  };
-}
-
-const DEMO_ALERTS: Alert[] = [
-  demoAlert(9001, "violent", "critical", "CAM_04", 1),
-  demoAlert(9002, "threatening", "high", "CAM_01", 4),
-  demoAlert(9003, "violent", "high", "CAM_04", 7),
-  demoAlert(9004, "threatening", "medium", "CAM_02", 15),
-  demoAlert(9005, "threatening", "low", "CAM_06", 32),
-];
-
 // ---------- Derived view data ----------
 // Use real streams when the backend has returned any; otherwise fall back to
 // demo cameras so the grid is never empty during offline preview.
@@ -82,28 +76,20 @@ const usingDemo = computed(() => streams.value.length === 0);
 
 const cameras = computed<CameraView[]>(() => {
   if (usingDemo.value) return DEMO_CAMERAS;
-  return activeStreams.value.map((s) => ({
+  // The backend runs a single detector against one source at a time.
+  // Only the first active stream gets the live feed; the rest show as offline
+  // until per-stream detection is implemented (Phase 4.5).
+  return activeStreams.value.map((s, i) => ({
     key: String(s.id),
     name: s.name,
     location: s.location ?? "",
     streamId: s.stream_id,
-    feedUrl: `${getApiUrl()}/video_feed/${s.stream_id}`,
-    online: true,
+    feedUrl: i === 0 ? `${getApiUrl()}/video_feed` : "",
+    online: i === 0,
   }));
 });
 
-const panelAlerts = computed<Alert[]>(() =>
-  alerts.value.length > 0 ? alerts.value.slice(0, 12) : DEMO_ALERTS,
-);
-
-// Cameras with a recent alert get the pulsing red border (like the screenshot).
-const alertingCameraIds = computed(() => {
-  const ids = new Set<string>();
-  for (const a of panelAlerts.value.slice(0, 6)) {
-    if (a.camera_id) ids.add(a.camera_id);
-  }
-  return ids;
-});
+const panelAlerts = computed<Alert[]>(() => alerts.value.slice(0, 12));
 
 function formatTime(iso: string): string {
   try {
@@ -183,7 +169,7 @@ const typeLabel: Record<Alert["type"], string> = {
             :stream-id="cam.streamId"
             :feed-url="cam.feedUrl"
             :online="cam.online"
-            :recent-alert="alertingCameraIds.has(cam.streamId)"
+            :recent-alert="flashingCameraIds.has(cam.streamId)"
           />
         </div>
       </div>

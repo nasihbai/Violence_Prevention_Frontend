@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, onUnmounted } from "vue";
 import { Badge } from "@/components/ui/badge";
-import { Video, VideoOff, AlertTriangle } from "lucide-vue-next";
+import { Video, VideoOff, AlertTriangle, Eye, EyeOff } from "lucide-vue-next";
 
 /**
  * Live-camera tile. Shows a placeholder feed area + camera metadata
@@ -19,6 +19,8 @@ interface Props {
   location?: string;
   streamId?: string;
   feedUrl?: string;
+  /** Raw feed URL (no skeleton/boxes). Enables the overlay toggle button. */
+  rawFeedUrl?: string;
   online?: boolean;
   /** Pulse a red border when there's a recent alert on this camera. */
   recentAlert?: boolean;
@@ -28,21 +30,45 @@ const props = withDefaults(defineProps<Props>(), {
   location: "",
   streamId: "",
   feedUrl: "",
+  rawFeedUrl: "",
   online: false,
   recentAlert: false,
 });
 
+const showOverlay = ref(true);
+const activeFeedUrl = computed(() =>
+  !showOverlay.value && props.rawFeedUrl ? props.rawFeedUrl : props.feedUrl
+);
+
 // If the MJPEG <img> fails to load (BE down, detector not running,
 // wrong URL) fall back to the placeholder instead of a broken-image icon.
 const feedFailed = ref(false);
+let retryTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleRetry() {
+  if (retryTimer) return;
+  retryTimer = setTimeout(() => {
+    retryTimer = null;
+    feedFailed.value = false; // triggers re-mount of <img>
+  }, 4000);
+}
+
 watch(
   () => [props.feedUrl, props.online],
   () => {
-    feedFailed.value = false; // retry on prop change
+    feedFailed.value = false;
   },
 );
 
-const showFeed = computed(() => props.online && !!props.feedUrl && !feedFailed.value);
+watch(feedFailed, (failed) => {
+  if (failed && props.online && props.feedUrl) scheduleRetry();
+});
+
+onUnmounted(() => {
+  if (retryTimer) clearTimeout(retryTimer);
+});
+
+const showFeed = computed(() => props.online && !!activeFeedUrl.value && !feedFailed.value);
 </script>
 
 <template>
@@ -54,7 +80,7 @@ const showFeed = computed(() => props.online && !!props.feedUrl && !feedFailed.v
     <div class="absolute inset-0">
       <img
         v-if="showFeed"
-        :src="feedUrl"
+        :src="activeFeedUrl"
         :alt="`Live feed from ${name}`"
         class="w-full h-full object-cover"
         @error="feedFailed = true"
@@ -98,8 +124,17 @@ const showFeed = computed(() => props.online && !!props.feedUrl && !feedFailed.v
       </span>
     </div>
 
-    <!-- Top-right: live / offline indicator -->
-    <div class="absolute top-2 right-2">
+    <!-- Top-right: live / offline indicator + overlay toggle -->
+    <div class="absolute top-2 right-2 flex items-center gap-1.5">
+      <button
+        v-if="online && rawFeedUrl"
+        :title="showOverlay ? 'Hide skeleton overlay' : 'Show skeleton overlay'"
+        class="flex items-center justify-center w-6 h-6 rounded bg-black/50 text-white hover:bg-black/70 transition-colors"
+        @click.stop="showOverlay = !showOverlay"
+      >
+        <EyeOff v-if="showOverlay" class="w-3.5 h-3.5" />
+        <Eye v-else class="w-3.5 h-3.5 text-yellow-300" />
+      </button>
       <Badge
         v-if="online"
         class="gap-1 bg-red-600/90 text-white border-0 hover:bg-red-600/90"

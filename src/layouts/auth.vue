@@ -78,13 +78,13 @@ const artwork = computed(() => {
         />
 
         <!-- Brand mark top-left -->
-        <div class="relative z-10 flex items-center gap-3 p-8">
+        <!-- <div class="relative z-10 flex items-center gap-3 p-8">
           <img
             src="@/assets/logo.png"
             alt="logo"
             class="h-12 w-auto rounded-lg drop-shadow-md"
           />
-        </div>
+        </div> -->
 
         <!-- Copy card bottom -->
         <div class="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-start p-8 xl:p-12">
@@ -109,7 +109,7 @@ const artwork = computed(() => {
             <img
               src="@/assets/logo.png"
               alt="logo"
-              class="h-11 w-auto rounded-lg lg:hidden"
+              class="h-11 w-auto rounded-lg"
             />
             <span class="type-card-title font-semibold text-foreground">
               {{ t("auth.brandName") }}

@@ -30,6 +30,7 @@ onMounted(() => {
 
 // ---------- Live feed ----------
 const videoFeedUrl = computed(() => `${getApiUrl()}/video_feed`);
+const rawVideoFeedUrl = computed(() => `${getApiUrl()}/video_feed/raw`);
 const primaryCamera = computed(() => activeStreams.value[0] ?? null);
 
 // ---------- Ticker ----------
@@ -88,6 +89,7 @@ const statCards = computed(() => [
             :location="primaryCamera.location ?? ''"
             :online="true"
             :feed-url="videoFeedUrl"
+            :raw-feed-url="rawVideoFeedUrl"
           />
           <div
             v-else

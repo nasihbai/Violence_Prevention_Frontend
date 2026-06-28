@@ -17,6 +17,25 @@ const props = defineProps<{
 const wm = new WeakMap()
 function template(d: any, i: number, elements: (HTMLElement | SVGElement)[]) {
   const valueFormatter = props.valueFormatter ?? ((tick: number) => `${tick}`)
+
+  // d3 PieArcDatum detection — Unovis Donut/Pie wraps each datum as
+  // { data: originalItem, value: number, startAngle, endAngle, index, padAngle }.
+  // The raw `d` has `.value` and `.startAngle` as its own properties, which would
+  // fool the `props.index in d` check below into the wrong branch.
+  if (d != null && typeof d === 'object' && 'data' in d && 'startAngle' in d) {
+    const data = d.data
+    if (wm.has(data)) return wm.get(data)
+    const style = getComputedStyle(elements[i])
+    const label = props.items?.[d.index]?.name
+      ?? String(Object.values(data).find(v => typeof v === 'string') ?? i)
+    const omittedData = [{ name: label, value: valueFormatter(d.value), color: style.fill }]
+    const componentDiv = document.createElement('div')
+    const TooltipComponent = props.customTooltip ?? ChartTooltip
+    createApp(TooltipComponent, { title: label, data: omittedData }).mount(componentDiv)
+    wm.set(data, componentDiv.innerHTML)
+    return componentDiv.innerHTML
+  }
+
   if (props.index in d) {
     if (wm.has(d)) {
       return wm.get(d)
