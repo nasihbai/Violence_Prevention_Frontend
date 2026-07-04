@@ -48,18 +48,26 @@ function onSocketDisconnect() {
   socketConnected.value = false;
 }
 
+// A camera's `is_live` is a snapshot from the last fetch — a worker that
+// finishes starting up after this page loaded would otherwise show
+// "offline" forever. Poll so tiles flip to live without a manual refresh.
+const STREAMS_POLL_MS = 5000;
+let streamsPollTimer: ReturnType<typeof setInterval> | null = null;
+
 onMounted(() => {
   socket.on("connect", onSocketConnect);
   socket.on("disconnect", onSocketDisconnect);
   socket.on("violence_alert", flashCameraForAlert);
   alertsStore.fetchAlerts();
   streamsStore.fetchStreams();
+  streamsPollTimer = setInterval(() => streamsStore.fetchStreams(), STREAMS_POLL_MS);
 });
 
 onBeforeUnmount(() => {
   socket.off("connect", onSocketConnect);
   socket.off("disconnect", onSocketDisconnect);
   socket.off("violence_alert", flashCameraForAlert);
+  if (streamsPollTimer) clearInterval(streamsPollTimer);
   // Don't disconnect the singleton — other pages may want live alerts.
   // Teardown happens on full app exit / logout.
 });
@@ -190,21 +198,16 @@ async function onSeedFive() {
 }
 
 // ---------- Camera tiles ----------
-// Tiles render from the real streams store (active streams only).
-//
-// The BE exposes ONE global MJPEG feed at /video_feed (the source the
-// detector was started with). Until Phase 4.5 adds per-stream feeds, we
-// designate the FIRST active camera as the "live" tile and point it at
-// /video_feed; the rest stay offline placeholders. The `recentAlert`
-// flag is derived from the live alert stream: any alert in the last 5s
-// for a given camera_id flashes its tile.
+// Tiles render from the real streams store (active streams only). Each
+// active camera runs its own detector worker, so every tile gets its own
+// MJPEG feed and real `is_live` status. The `recentAlert` flag is derived
+// from the live alert stream: any alert in the last 5s for a given
+// camera_id flashes its tile.
 const recentAlertCameras = ref<Set<string>>(new Set());
 
-/** The single MJPEG endpoint the running detector serves. */
-const videoFeedUrl = computed(() => `${getApiUrl()}/video_feed`);
-
-/** First active camera is treated as the one the detector is monitoring. */
-const liveStreamId = computed(() => activeStreams.value[0]?.stream_id ?? null);
+function feedUrlFor(streamId: string): string {
+  return `${getApiUrl()}/video_feed/${streamId}`;
+}
 
 function isCameraFlashing(streamId: string): boolean {
   return recentAlertCameras.value.has(streamId);
@@ -247,14 +250,13 @@ function flashCameraForAlert(alert: Alert) {
       </div>
     </div>
 
-    <!-- Camera tiles (live feed wires in Phase 4.5) -->
+    <!-- Camera tiles -->
     <Card>
       <CardHeader>
         <CardTitle>Live cameras</CardTitle>
         <CardDescription>
-          The primary camera shows the live detector feed. Real-time alerts
-          flash the corresponding tile. Per-camera feeds arrive with the
-          multi-camera grid.
+          Every active camera streams its own live detector feed. Real-time
+          alerts flash the corresponding tile.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -278,8 +280,8 @@ function flashCameraForAlert(alert: Alert) {
             :name="cam.name"
             :stream-id="cam.stream_id"
             :location="cam.location ?? ''"
-            :online="cam.stream_id === liveStreamId"
-            :feed-url="cam.stream_id === liveStreamId ? videoFeedUrl : ''"
+            :online="cam.is_live"
+            :feed-url="feedUrlFor(cam.stream_id)"
             :recent-alert="isCameraFlashing(cam.stream_id)"
           />
         </div>

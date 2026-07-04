@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
+import { onMounted, onUnmounted, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { useStreamsStore } from "@/stores/streams";
 import { useAlertsStore } from "@/stores/alerts";
@@ -22,16 +22,31 @@ const { stats } = storeToRefs(statsStore);
 // stats_update listeners (wired in useSocket) — the stores then stay live.
 useSocket();
 
+// A camera's `is_live` is a snapshot from the last fetch — a worker that
+// finishes starting up after this page loaded would otherwise show
+// "offline" forever. Poll so the primary tile flips to live automatically.
+const STREAMS_POLL_MS = 5000;
+let streamsPollTimer: ReturnType<typeof setInterval> | null = null;
+
 onMounted(() => {
   streamsStore.fetchStreams();
   alertsStore.fetchAlerts();
   statsStore.fetchStats();
+  streamsPollTimer = setInterval(() => streamsStore.fetchStreams(), STREAMS_POLL_MS);
+});
+
+onUnmounted(() => {
+  if (streamsPollTimer) clearInterval(streamsPollTimer);
 });
 
 // ---------- Live feed ----------
-const videoFeedUrl = computed(() => `${getApiUrl()}/video_feed`);
-const rawVideoFeedUrl = computed(() => `${getApiUrl()}/video_feed/raw`);
 const primaryCamera = computed(() => activeStreams.value[0] ?? null);
+const videoFeedUrl = computed(() =>
+  primaryCamera.value ? `${getApiUrl()}/video_feed/${primaryCamera.value.stream_id}` : "",
+);
+const rawVideoFeedUrl = computed(() =>
+  primaryCamera.value ? `${getApiUrl()}/video_feed/${primaryCamera.value.stream_id}/raw` : "",
+);
 
 // ---------- Ticker ----------
 const recentAlerts = computed(() => alerts.value.slice(0, 8));
@@ -87,7 +102,7 @@ const statCards = computed(() => [
             :name="primaryCamera.name"
             :stream-id="primaryCamera.stream_id"
             :location="primaryCamera.location ?? ''"
-            :online="true"
+            :online="primaryCamera.is_live"
             :feed-url="videoFeedUrl"
             :raw-feed-url="rawVideoFeedUrl"
           />

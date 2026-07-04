@@ -37,10 +37,18 @@ function flashCamera(alert: Alert) {
 
 const socket = useSocket();
 
+// A camera's `is_live` is a snapshot from the last fetch — a worker that
+// finishes starting up after this page loaded would otherwise show
+// "offline" forever. Poll so tiles flip to live without a manual refresh.
+const STREAMS_POLL_MS = 5000;
+let streamsPollTimer: ReturnType<typeof setInterval> | null = null;
+
 onMounted(() => {
   streamsStore.fetchStreams();
   alertsStore.fetchAlerts();
   statsStore.fetchStats();
+
+  streamsPollTimer = setInterval(() => streamsStore.fetchStreams(), STREAMS_POLL_MS);
 
   // Wire live flash directly off the SocketIO event, not the DB store.
   socket.on("violence_alert", flashCamera);
@@ -48,6 +56,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   socket.off("violence_alert", flashCamera);
+  if (streamsPollTimer) clearInterval(streamsPollTimer);
 });
 
 // ---------- Demo fallback data (offline preview, no backend) ----------
@@ -76,16 +85,16 @@ const usingDemo = computed(() => streams.value.length === 0);
 
 const cameras = computed<CameraView[]>(() => {
   if (usingDemo.value) return DEMO_CAMERAS;
-  // The backend runs a single detector against one source at a time.
-  // Only the first active stream gets the live feed; the rest show as offline
-  // until per-stream detection is implemented (Phase 4.5).
-  return activeStreams.value.map((s, i) => ({
+  // Each active stream runs its own detector worker (multi-camera grid) —
+  // every tile gets its own feed URL, and `online` reflects the backend's
+  // real is_live status for that camera.
+  return activeStreams.value.map((s) => ({
     key: String(s.id),
     name: s.name,
     location: s.location ?? "",
     streamId: s.stream_id,
-    feedUrl: i === 0 ? `${getApiUrl()}/video_feed` : "",
-    online: i === 0,
+    feedUrl: `${getApiUrl()}/video_feed/${s.stream_id}`,
+    online: s.is_live,
   }));
 });
 

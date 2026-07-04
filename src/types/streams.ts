@@ -13,6 +13,8 @@ export interface Stream {
   source_url: string;
   location: string | null;
   is_active: boolean;
+  /** True when the backend currently has a running detector worker for this camera. */
+  is_live: boolean;
 }
 
 /** Payload for creating a stream. */

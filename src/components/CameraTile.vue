@@ -9,10 +9,8 @@ import { Video, VideoOff, AlertTriangle, Eye, EyeOff } from "lucide-vue-next";
  * when `feedUrl` is provided AND `online` is true — otherwise a styled
  * placeholder fills the space so the grid layout is stable.
  *
- * This component is the visual scaffold for Phase 4.5 (Multi-Camera Grid).
- * The backend half (per-stream /video_feed/<id> + parallel detectors)
- * comes later; for now you can pass `online: false` and just get the
- * "camera registered but no feed" look.
+ * Each camera has its own detector worker and its own `/video_feed/<id>`
+ * MJPEG endpoint; `online` should be driven by the Stream's `is_live` flag.
  */
 interface Props {
   name: string;
