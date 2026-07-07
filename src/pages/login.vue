@@ -77,7 +77,11 @@ async function handleSubmit() {
     }
   } catch (error: any) {
     console.error("Login error:", error);
-    toast.error(error.message || t("auth.incorrectCredentials"));
+    if (error?.response?.status === 403 || error?.status === 403) {
+      toast.error(error?.data?.message || t("auth.login.unverified"));
+    } else {
+      toast.error(error.message || t("auth.incorrectCredentials"));
+    }
   } finally {
     isSubmitting.value = false;
   }

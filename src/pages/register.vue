@@ -15,6 +15,7 @@ import {
   LoaderCircle,
 } from "lucide-vue-next";
 import { toast } from "vue-sonner";
+import { resendVerification } from "@/services/auth.service";
 
 interface FBAuthResponse {
   accessToken: string;
@@ -50,6 +51,10 @@ const showConfirmPassword = ref(false);
 const isGoogleLoaded = ref(false);
 const isFacebookLoaded = ref(false);
 
+const registered = ref(false);
+const registeredEmail = ref("");
+const isResending = ref(false);
+
 async function handleSubmit() {
   if (
     !businessName.value ||
@@ -69,19 +74,41 @@ async function handleSubmit() {
   try {
     isSubmitting.value = true;
 
-    // await authStore.register({
-    //   business_name: businessName.value,
-    //   email: email.value,
-    //   password: password.value,
-    // });
+    // register.vue's "Business Name" field maps to the account's `username`
+    await authStore.register({
+      username: businessName.value,
+      email: email.value,
+      password: password.value,
+    });
 
+    registeredEmail.value = email.value;
+    registered.value = true;
     toast.success(t("auth.register.registrationSuccess"));
-    router.push("/login");
+    // No router.push("/login") here — login 403s until verified, so
+    // redirecting immediately would just produce a confusing failed login.
   } catch (error: any) {
     console.error("Registration error:", error);
-    toast.error(error.data?.message || t("auth.register.registrationFailed"));
+    // api.ts already auto-toasts 422 field errors (duplicate email/username);
+    // only show a fallback toast here for the truly-unexpected case.
+    if (!error?.data?.errors) {
+      toast.error(error?.data?.message || t("auth.register.registrationFailed"));
+    }
   } finally {
     isSubmitting.value = false;
+  }
+}
+
+async function handleResend() {
+  try {
+    isResending.value = true;
+    await resendVerification(registeredEmail.value);
+    toast.success(t("auth.register.resendSuccess"));
+  } catch (error: any) {
+    if (!error?.data?.errors) {
+      toast.error(error?.data?.message || t("auth.register.resendFailed"));
+    }
+  } finally {
+    isResending.value = false;
   }
 }
 
@@ -223,6 +250,39 @@ onMounted(() => {
 
 <template>
   <div>
+    <template v-if="registered">
+      <div class="mb-8 flex flex-col space-y-2 text-center">
+        <h1 class="type-page-title text-foreground">
+          {{ t("auth.register.checkEmailTitle") }}
+        </h1>
+        <p class="text-sm text-muted-foreground">
+          {{ t("auth.register.checkEmailBody", { email: registeredEmail }) }}
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        <Button
+          variant="secondary"
+          class="h-12 w-full"
+          :disabled="isResending"
+          @click="handleResend"
+        >
+          <LoaderCircle v-if="isResending" class="mr-2 h-4 w-4 animate-spin" />
+          <span>{{ t("auth.register.resendButton") }}</span>
+        </Button>
+
+        <p class="text-center text-sm text-muted-foreground">
+          <router-link
+            to="/login"
+            class="font-medium text-primary underline-offset-4 hover:underline"
+          >
+            {{ t("auth.signIn") }}
+          </router-link>
+        </p>
+      </div>
+    </template>
+
+    <template v-else>
     <div class="mb-8 flex flex-col space-y-2">
       <h1 class="type-page-title text-foreground">
         {{ t("auth.register.title") }}
@@ -409,5 +469,6 @@ onMounted(() => {
         {{ t("auth.signIn") }}
       </router-link>
     </p>
+    </template>
   </div>
 </template>

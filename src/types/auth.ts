@@ -16,10 +16,21 @@ export interface LoginCredentials {
 }
 
 export interface RegisterCredentials {
+  username: string;
   email: string;
-  fullname: string;
   password: string;
-  password_confirmation: string;
+}
+
+export interface RegisterResponse {
+  id: number;
+  username: string;
+  email: string;
+  message: string;
+}
+
+export interface VerifyEmailResponse {
+  message: string;
+  email?: string;
 }
 
 export interface SSOCredentials {

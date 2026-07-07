@@ -54,7 +54,8 @@
       "quickLoginHint": "Superadmin: Platform manager | Admin: Regular admin | User: Standard user",
       "roleSuperadmin": "Superadmin",
       "roleAdmin": "Admin",
-      "roleUser": "User"
+      "roleUser": "User",
+      "unverified": "Please verify your email before logging in."
     },
     "register": {
       "title": "Create an account",
@@ -69,7 +70,23 @@
       "orContinueWith": "Or continue with",
       "passwordsDoNotMatch": "Passwords do not match",
       "registrationSuccess": "Registration successful! Please check your email to verify your account.",
-      "registrationFailed": "Registration failed. Please try again."
+      "registrationFailed": "Registration failed. Please try again.",
+      "checkEmailTitle": "Check your email",
+      "checkEmailBody": "We sent a verification link to {email}. Click it to activate your account.",
+      "resendButton": "Resend verification email",
+      "resendSuccess": "Verification email resent.",
+      "resendFailed": "Could not resend the verification email."
+    },
+    "verify": {
+      "verifying": "Verifying your email…",
+      "success": "Your email has been verified! You can now log in.",
+      "error": "This verification link is invalid.",
+      "expired": "This verification link has expired. Enter your email below to get a new one.",
+      "missingToken": "No verification token was provided.",
+      "goToLogin": "Go to Login",
+      "resendButton": "Resend verification email",
+      "resendSuccess": "Verification email resent.",
+      "resendFailed": "Could not resend the verification email."
     },
     "forgot": {
       "title": "Forgot Password",

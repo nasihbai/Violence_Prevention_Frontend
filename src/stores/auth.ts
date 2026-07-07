@@ -5,10 +5,12 @@ import { ofetch } from "ofetch";
 import {
   type User,
   type LoginCredentials,
+  type RegisterCredentials,
   type SSOCredentials,
   type UserRole
 } from "@/types/auth";
 import { apiPost } from "@/services/api";
+import { registerUser } from "@/services/auth.service";
 
 const getApiUrl = (): string => {
   const envUrl = import.meta.env.VITE_API_URL as string | undefined;
@@ -260,6 +262,37 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   /**
+   * Register a new account. Calls POST /auth/register on the Python BE.
+   * Does NOT log the user in — the BE returns no access_token, since login
+   * is gated on is_verified until the emailed verification link is clicked.
+   */
+  async function register(credentials: RegisterCredentials): Promise<{ message: string }> {
+    isLoading.value = true;
+    error.value = null;
+
+    if (MOCK_AUTH) {
+      isLoading.value = false;
+      return { message: "Mock registration complete (no backend call in MOCK_AUTH mode)." };
+    }
+
+    try {
+      const res = await registerUser(credentials);
+      return { message: res.message };
+    } catch (e: any) {
+      console.error("Registration error:", e);
+      const beMsg =
+        e?.data?.errors?.email?.[0] ||
+        e?.data?.errors?.username?.[0] ||
+        e?.data?.errors?._?.[0] ||
+        e?.data?.message;
+      error.value = beMsg || e?.message || "Registration failed";
+      throw e;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /**
    * SSO login.
    *
    * Disabled: the Python backend does not implement /auth/sso/* endpoints
@@ -390,6 +423,7 @@ export const useAuthStore = defineStore("auth", () => {
     hasRole,
     hasPermission,
     login,
+    register,
     loginWithSSO,
     logout,
     init,
