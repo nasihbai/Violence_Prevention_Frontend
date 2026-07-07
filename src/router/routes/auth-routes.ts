@@ -42,5 +42,15 @@ export const authRoutes: RouteRecordRaw[] = [
       layout: 'auth' as LayoutType,
       title: 'Forgot Password'
     }
+  },
+  {
+    path: '/verify-email',
+    name: 'verify-email',
+    component: () => import('@/pages/verify-email.vue'),
+    meta: {
+      requiresAuth: false,
+      layout: 'auth' as LayoutType,
+      title: 'Verify Email'
+    }
   }
-]; 
+];

@@ -54,7 +54,8 @@
       "quickLoginHint": "Superadmin: Administrador de plataforma | Admin: Administrador regular | Usuario: Usuario estándar",
       "roleSuperadmin": "Superadmin",
       "roleAdmin": "Admin",
-      "roleUser": "Usuario"
+      "roleUser": "Usuario",
+      "unverified": "Por favor, verifica tu correo electrónico antes de iniciar sesión."
     },
     "register": {
       "title": "Crea una cuenta",
@@ -69,7 +70,23 @@
       "orContinueWith": "O continúa con",
       "passwordsDoNotMatch": "Las contraseñas no coinciden",
       "registrationSuccess": "¡Registro exitoso! Por favor, revisa tu correo para verificar tu cuenta.",
-      "registrationFailed": "El registro falló. Por favor, inténtalo de nuevo."
+      "registrationFailed": "El registro falló. Por favor, inténtalo de nuevo.",
+      "checkEmailTitle": "Revisa tu correo",
+      "checkEmailBody": "Enviamos un enlace de verificación a {email}. Haz clic en él para activar tu cuenta.",
+      "resendButton": "Reenviar correo de verificación",
+      "resendSuccess": "Correo de verificación reenviado.",
+      "resendFailed": "No se pudo reenviar el correo de verificación."
+    },
+    "verify": {
+      "verifying": "Verificando tu correo…",
+      "success": "¡Tu correo ha sido verificado! Ya puedes iniciar sesión.",
+      "error": "Este enlace de verificación no es válido.",
+      "expired": "Este enlace de verificación ha expirado. Ingresa tu correo abajo para obtener uno nuevo.",
+      "missingToken": "No se proporcionó ningún token de verificación.",
+      "goToLogin": "Ir a Iniciar sesión",
+      "resendButton": "Reenviar correo de verificación",
+      "resendSuccess": "Correo de verificación reenviado.",
+      "resendFailed": "No se pudo reenviar el correo de verificación."
     },
     "forgot": {
       "title": "Olvidé mi contraseña",
